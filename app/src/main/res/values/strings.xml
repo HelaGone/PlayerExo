@@ -32,6 +32,9 @@
     </string-array>
 
     <string name="nav_share">Compartir</string>
+    <string name="txt_dummy">- Aire Libre -</string>
+    <string name="num_dummy">00:00</string>
+
 
     <string name="activity_title_about_us">Nosotros</string>
     <string name="activity_title_privacy_policy">Privacy Policy</string>

@@ -10,8 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.utility.Shoutcast;
 import com.helagone.airelibre.utility.ShoutcastHelper;
@@ -32,7 +35,9 @@ public class AlMusicaFragment extends Fragment {
 
     ImageButton trigger;
     TextView textView;
+    ImageView coverart;
 
+    String coverUrl = "http://lisa.mx/airelibre/al_imagenes/art-00.jpg";
     String streamURL;
 
     private List<Shoutcast> shoutcasts = new ArrayList<>();
@@ -95,6 +100,7 @@ public class AlMusicaFragment extends Fragment {
 
         trigger = fragmentView.findViewById(R.id.id_trigger);
         textView = fragmentView.findViewById(R.id.lbl_trackinfo);
+        coverart = fragmentView.findViewById(R.id.imgAlbum);
 
 
         trigger.setOnClickListener(new View.OnClickListener() {
@@ -106,6 +112,14 @@ public class AlMusicaFragment extends Fragment {
                 mListener.onFragmentInteraction(streamURL);
             }
         });
+
+        if(getActivity() != null){
+            if(getActivity() != null){
+                RequestOptions options = new RequestOptions();
+                options.circleCrop();
+                Glide.with(getActivity()).load(coverUrl).apply(options).into(coverart);
+            }
+        }
 
 
         // Inflate the layout for this fragment

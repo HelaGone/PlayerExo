@@ -7,6 +7,189 @@
     android:layout_height="match_parent"
     tools:context="com.helagone.airelibre.MainActivity">
 
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/info_container"
+        android:layout_width="395dp"
+        android:layout_height="wrap_content"
+
+        app:layout_constraintTop_toBottomOf="@+id/framelayout"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="120dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_goneMarginStart="0dp"
+        tools:layout_editor_absoluteX="0dp">
+
+        <LinearLayout
+            android:id="@+id/id_timers"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintEnd_toEndOf="parent"
+
+            app:layout_constraintStart_toStartOf="parent"
+
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.41000003"
+            app:layout_goneMarginTop="0dp">
+
+
+            <TextView
+                android:id="@+id/lbl_timeremain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="@string/num_dummy"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/lbl_item_separador"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" | "
+                tools:layout_conversion_absoluteHeight="0dp"
+                tools:layout_conversion_absoluteWidth="0dp"
+                tools:layout_conversion_absoluteX="21dp"
+                tools:layout_conversion_absoluteY="441dp" />
+
+            <TextView
+                android:id="@+id/lbl_trDur"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="@string/num_dummy"
+                android:textAlignment="center"
+                tools:layout_conversion_absoluteHeight="26dp"
+                tools:layout_conversion_absoluteWidth="36dp"
+                tools:layout_conversion_absoluteX="187dp"
+                tools:layout_conversion_absoluteY="441dp" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/id_timers"
+
+            app:layout_constraintStart_toStartOf="parent"
+
+            app:layout_constraintEnd_toEndOf="parent"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="16dp"
+
+            tools:layout_editor_absoluteX="8dp">
+
+
+            <Button
+                android:id="@+id/btn_to_playlist"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:text="@string/txt_dummy" />
+
+            <TextView
+                android:id="@+id/lbl_trackinfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/txt_dummy"
+                android:padding="0dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="16dp"/>
+
+            <ToggleButton
+                android:id="@+id/likeEmpty"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/toggle_like"
+                android:textOff=""
+                android:textOn=""
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+    </android.support.constraint.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/framelayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="0dp"
+        android:layout_marginTop="110dp"
+        app:layout_constraintBottom_toTopOf="@+id/info_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="-212dp">
+
+
+        <com.mikhaellopez.circularprogressbar.CircularProgressBar
+            android:id="@+id/circularprogressBar"
+            android:layout_width="270dp"
+            android:layout_height="270dp"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="5dp"
+            app:cpb_background_progressbar_color="@color/pale_grey"
+            app:cpb_background_progressbar_width="1dp"
+            app:cpb_progressbar_color="@color/bright_teal"
+            app:cpb_progressbar_width="4dp" />
+
+        <ImageView
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="0dp"
+            android:src="@drawable/ic_album_shadow_border"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+
+        <ImageView
+            android:id="@+id/imgAlbum"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"
+            android:layout_marginTop="10dp"
+            android:padding="15dp"
+            android:src="@mipmap/ic_album_image_default"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+        <ImageButton
+            android:id="@+id/id_trigger"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="110dp"
+            android:src="@drawable/ic_play_arrow_black"
+            android:background="@drawable/ic_album_inside_circle"
+            android:visibility="visible"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp" />
+
+    </FrameLayout>
+
+
+
+
+
+<!-- /////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ -->
+    <!--
     <TextView
         android:id="@+id/lbl_trackinfo"
         android:layout_width="wrap_content"
@@ -43,6 +226,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.84000003"
         app:srcCompat="@drawable/ic_play_arrow_black" />
+        -->
 
 
 
