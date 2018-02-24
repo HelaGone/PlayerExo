@@ -3,4 +3,21 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!--APP COLOR PALETTE-->
+    <color name="electric_blue">#0245ff</color>
+    <color name="bright_teal">#00f2dd</color>
+    <color name="duck_egg_blue">#cbfbf7</color>
+    <color name="duck_egg_blue_pale">#edfafb</color>
+    <color name="orange">#ff5700</color>
+    <color name="dark">#0a0b1e</color>
+    <color name="dark_grey_blue">#2d2f52</color>
+    <color name="slate_grey">#61637f</color>
+    <color name="cool_grey">#939c9f</color>
+    <color name="silver">#dadfe4</color>
+    <color name="pale_grey">#f2f4f7</color>
+    <color name="grey_circle">#d2d9db</color>
+    <color name="blanco">#ffffff</color>
+    <color name="transparente">#00ffffff</color>
+    <color name="bg_view">#fafafa</color>
 </resources>

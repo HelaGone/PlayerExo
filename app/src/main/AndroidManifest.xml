@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
 
     <application
@@ -15,8 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <service android:name=".service.RadioService"/>
+        <service android:name=".service.RadioService" />
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -32,12 +32,14 @@
             Required on pre-Lollipop. More information at
             http://developer.android.com/reference/android/support/v4/media/session/MediaButtonReceiver.html
         -->
-        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver" >
+        <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
         </receiver>
 
+        <activity android:name=".activity.TermsActivity" />
+        <activity android:name=".activity.ScheduleActivity"></activity>
     </application>
 
 </manifest>
