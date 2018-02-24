@@ -19,7 +19,7 @@ public class RadioManager {
     private Context context;
     private boolean serviceBound;
 
-    private RadioManager(Context context) {
+    public RadioManager(Context context) {
         this.context = context;
         serviceBound = false;
     }
