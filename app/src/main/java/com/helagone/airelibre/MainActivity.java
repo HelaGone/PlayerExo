@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity
     LayoutInflater linearLayout;
 
     LinearLayout almusic;
+    LinearLayout terms;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity
         linearLayout = getLayoutInflater();
 
         almusic = navigationView.getHeaderView(0).findViewById(R.id.id_nav_almusic);
+        terms = navigationView.findViewById(R.id.menu_item_terms);
 
         almusic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,7 +111,14 @@ public class MainActivity extends AppCompatActivity
                 CURRENT_TAG = TAG_ALMUSICA;
                 navItemIndex = 0;
                 loadHomeFragment();
+                drawer.closeDrawers();
+            }
+        });
 
+        terms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(MainActivity.this, TermsActivity.class));
                 drawer.closeDrawers();
             }
         });
@@ -246,10 +255,10 @@ public class MainActivity extends AppCompatActivity
                         navItemIndex = 6;
                         CURRENT_TAG = TAG_CONTACT;
                         break;
-                    case R.id.nav_terms_id:
+                    /*case R.id.nav_terms_id:
                         startActivity(new Intent(MainActivity.this, TermsActivity.class));
                         drawer.closeDrawers();
-                        return true;
+                        return true;*/
                     default:
                         navItemIndex = 0;
                 }

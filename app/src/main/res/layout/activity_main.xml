@@ -18,8 +18,29 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:itemTextColor="@color/dark_grey_blue"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer">
+
+        <LinearLayout
+            android:id="@+id/menu_item_terms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="24dp"
+            android:layout_marginStart="24dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/nav_terms"
+                android:textColor="@color/cool_grey"/>
+
+        </LinearLayout>
+
     </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
