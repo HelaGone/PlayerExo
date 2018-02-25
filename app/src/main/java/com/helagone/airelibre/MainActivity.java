@@ -134,6 +134,8 @@ public class MainActivity extends AppCompatActivity
 
         lbl_emisoras.setTypeface(ws_semibold);
 
+        toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.toolbar_bg));
+
 
         /**
          * TIME SHIFT
