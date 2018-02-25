@@ -1,12 +1,14 @@
 package com.helagone.airelibre;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,6 +21,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -39,8 +43,11 @@ import com.helagone.airelibre.utility.ShoutcastHelper;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity
         implements
@@ -86,13 +93,30 @@ public class MainActivity extends AppCompatActivity
     LinearLayout almusic;
     LinearLayout terms;
 
+    TextView titleToolbar;
+
+    //TIME SHIFT
+    Date d_current_date;
+    SimpleDateFormat thedateFormat =  new SimpleDateFormat("HH:mm", Locale.getDefault());
+    public int limit;
+    String _the_time;
+
+    Typeface custom_font;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        custom_font = Typeface.createFromAsset(getAssets(),  "fonts/WorkSans-Regular.ttf");
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        titleToolbar = toolbar.findViewById(R.id.titleToolbar);
+        titleToolbar.setTextColor(getResources().getColor(R.color.cool_grey));
+        titleToolbar.setTypeface(custom_font);
+
 
         mHandler = new Handler();
 
@@ -104,10 +128,38 @@ public class MainActivity extends AppCompatActivity
         almusic = navigationView.getHeaderView(0).findViewById(R.id.id_nav_almusic);
         terms = navigationView.findViewById(R.id.menu_item_terms);
 
+        /**
+         * TIME SHIFT
+         */
+        //TODAY CALC
+        d_current_date = new Date();
+        _the_time = thedateFormat.format(d_current_date);
+        String twentyfour = _the_time.replace(":", "");
+        limit =  Integer.parseInt(twentyfour);
+
+
+        if(limit > 1800 || limit < 700 ){
+            Window window = this.getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(ContextCompat.getColor(this,R.color.dark));
+
+
+            toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.dark));
+            titleToolbar.setTextColor(getResources().getColor(R.color.cool_grey));
+            try{
+                ((AppCompatActivity) this).getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.dark));
+            }catch(NullPointerException nex){
+                nex.printStackTrace();
+            }
+        }else{
+            titleToolbar.setTextColor(getResources().getColor(R.color.dark_grey_blue));
+        }
+
+
         almusic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d("perros", "perros >>>>>>");
                 CURRENT_TAG = TAG_ALMUSICA;
                 navItemIndex = 0;
                 loadHomeFragment();
@@ -221,7 +273,11 @@ public class MainActivity extends AppCompatActivity
 
 
     private void setToolbarTitle() {
-        getSupportActionBar().setTitle(activityTitles[navItemIndex]);
+
+        TextView titleTollbar = findViewById(R.id.titleToolbar);
+        titleTollbar.setText(activityTitles[navItemIndex]);
+
+        //getSupportActionBar().setTitle(activityTitles[navItemIndex]);
     }
 
     private void selectNavMenu() {
@@ -302,6 +358,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -316,8 +373,24 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        return super.onOptionsItemSelected(item);
+        String app_store_url = "playstore.com";
+        switch(item.getItemId()){
+            case R.id.action_share:
+                ShareThis("Descarga airelibre: ", app_store_url);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
+
+    public void ShareThis(String title, String message) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(sendIntent.EXTRA_SUBJECT, title);
+        sendIntent.putExtra(sendIntent.EXTRA_TEXT, message);
+        sendIntent.setType("text/plain");
+        startActivity(Intent.createChooser(sendIntent, "Compartir"));
+    }//END SHARE THIS
 
 
 
