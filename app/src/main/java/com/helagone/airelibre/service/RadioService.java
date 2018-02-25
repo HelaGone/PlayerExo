@@ -18,6 +18,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -42,7 +43,9 @@ import org.greenrobot.eventbus.EventBus;
  * Created by programacion2 on 2/23/18.
  */
 
-public class RadioService extends Service implements Player.EventListener, AudioManager.OnAudioFocusChangeListener {
+public class RadioService extends Service implements
+        Player.EventListener,
+        AudioManager.OnAudioFocusChangeListener {
 
     public static final String ACTION_PLAY = "com.mcakir.radio.player.ACTION_PLAY";
     public static final String ACTION_PAUSE = "com.mcakir.radio.player.ACTION_PAUSE";
@@ -318,7 +321,7 @@ public class RadioService extends Service implements Player.EventListener, Audio
 
     @Override
     public void onSeekProcessed() {
-
+        Log.d("hols", "hola>>>>>>");
     }
 
 

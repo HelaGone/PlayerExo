@@ -10,6 +10,7 @@
     <string name="closeDrawer">close_drawer</string>
 
     <!-- Navigation Drawer menu labels -->
+    <string name="lbl_emisoras">EMISORAS</string>
     <string name="nav_almusica">AL MÚSICA</string>
     <string name="nav_alcdmx">AL CDMX</string>
     <string name="nav_altulum">AL TULÚM</string>
@@ -21,14 +22,14 @@
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
-        <item>AL MÚSICA</item>
+        <item>AL Música</item>
         <item>AL CDMX</item>
-        <item>AL TULUM</item>
-        <item>PROGRAMACIÓN</item>
-        <item>FAVORITOS</item>
-        <item>NOSOTROS</item>
-        <item>CONTACTO</item>
-        <item>TÉRMINOS &amp; CONDICIONES </item>
+        <item>AL Tulúm</item>
+        <item>Programación</item>
+        <item>Favoritos</item>
+        <item>Nosotros</item>
+        <item>Contacto</item>
+        <item>Términios &amp; Condiciones</item>
     </string-array>
 
     <string name="nav_share">Compartir</string>

@@ -1,6 +1,8 @@
 package com.helagone.airelibre.fragments;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
@@ -20,9 +22,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
+import com.helagone.airelibre.activity.ScheduleActivity;
 import com.helagone.airelibre.datafetch.CurrentMetadataFetcher;
 import com.helagone.airelibre.datamodel.TrackModel;
+import com.helagone.airelibre.service.RadioManager;
 import com.helagone.airelibre.utility.Shoutcast;
 import com.helagone.airelibre.utility.ShoutcastHelper;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -36,6 +41,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -97,10 +105,16 @@ public class AlMusicaFragment extends Fragment {
 
     Boolean yesno = true;
     Boolean isready = false;
+    Boolean cancelled = false;
 
     public ArrayList<TrackModel> oneTrackModels =  new ArrayList<>();
 
     Typeface custom_font;
+    Typeface ws_semibold;
+
+    MetadataFetcher metadataFetcher;
+
+    RadioManager radioManager;
 
 
 
@@ -123,18 +137,11 @@ public class AlMusicaFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment AlMusicaFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static AlMusicaFragment newInstance(String param1, String param2) {
-        AlMusicaFragment fragment = new AlMusicaFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static AlMusicaFragment newInstance() {
+        return new AlMusicaFragment();
     }
 
 
@@ -148,6 +155,7 @@ public class AlMusicaFragment extends Fragment {
 
 
         shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
+        radioManager = new RadioManager(getActivity());
     }
 
     @Override
@@ -166,16 +174,18 @@ public class AlMusicaFragment extends Fragment {
         time_duration = fragmentView.findViewById(R.id.lbl_trDur);
         spacer_pipe = fragmentView.findViewById(R.id.lbl_item_separador);
 
-        gotoPlaylist.setTypeface(custom_font);
+        gotoPlaylist.setTypeface(ws_semibold);
         artistName.setTypeface(custom_font);
         time_remain.setTypeface(custom_font);
         time_duration.setTypeface(custom_font);
         spacer_pipe.setTypeface(custom_font);
 
-        mProgressBar.setColor( ContextCompat.getColor(getActivity(), R.color.bright_teal) );
-        mProgressBar.setProgressBarWidth(10);
-        mProgressBar.setProgress(0);
-        mProgressBar.setProgressWithAnimation(100, 5000);
+        SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+        int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
+
+        //handler.postDelayed(progressbar_update, 1000);
+        handler.postDelayed(runnable, cr_loquefalta);
+
 
         //HANDLING TIME OF THE DAY
 
@@ -196,22 +206,19 @@ public class AlMusicaFragment extends Fragment {
             }
         }
 
-        handler.postDelayed(runnable, 10);
 
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                if(yesno){
-                    trigger.setBackground(getResources().getDrawable(R.color.transparente));
-                    trigger.setImageResource(R.color.transparente);
-                    yesno = false;
-                }else{
-                    trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
-                    trigger.setImageResource(R.drawable.ic_play_arrow_black);
-                    yesno = true;
+                if(radioManager != null ){
+                    if(radioManager.isPlaying()){
+                        trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+                        trigger.setImageResource(R.drawable.ic_play_arrow_black);
+                    }else{
+                        trigger.setBackground(getResources().getDrawable(R.color.transparente));
+                        trigger.setImageResource(R.color.transparente);
+                    }
                 }
-
 
                 shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                 //artistName.setText(shoutcasts.get(0).getName());
@@ -219,6 +226,13 @@ public class AlMusicaFragment extends Fragment {
 
                 //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                 mListener.onFragmentInteraction(streamURL);
+            }
+        });
+
+        gotoPlaylist.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(getActivity(), ScheduleActivity.class));
             }
         });
 
@@ -248,7 +262,10 @@ public class AlMusicaFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
 
+            new MetadataFetcher().execute();
+
             custom_font = Typeface.createFromAsset(getActivity().getAssets(),  "fonts/WorkSans-Regular.ttf");
+            ws_semibold    = Typeface.createFromAsset(getActivity().getAssets(), "fonts/WorkSans-SemiBold.ttf");
 
             //TODAY CALC
             d_current_date = new Date();
@@ -264,10 +281,42 @@ public class AlMusicaFragment extends Fragment {
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        handler.removeCallbacks(progressbar_update);
+        handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(radioManager != null){
+            if( radioManager.isPlaying() ){
+                trigger.setBackground(getResources().getDrawable(R.color.transparente));
+                trigger.setImageResource(R.color.transparente);
+            }else{
+                trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+                trigger.setImageResource(R.drawable.ic_play_arrow_black);
+            }
+        }
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        handler.removeCallbacks(progressbar_update);
+        handler.removeCallbacks(runnable);
     }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        handler.removeCallbacks(progressbar_update);
+        handler.removeCallbacks(runnable);
+    }
+
+
 
 
     /**
@@ -278,7 +327,6 @@ public class AlMusicaFragment extends Fragment {
         @Override
         protected CurrentMetadataFetcher doInBackground(URL... urls) {
             CurrentMetadataFetcher fetchMetadata = new CurrentMetadataFetcher();
-
 
 
             try {
@@ -317,8 +365,8 @@ public class AlMusicaFragment extends Fragment {
                 int startTime_in_millis = (int) startTime_date.getTime();
 
 
-                Log.d("current_in_millis", String.valueOf(current_in_millis));
-                Log.d("current_in_millis", String.valueOf(startTime_in_millis));
+                /*Log.d("current_in_millis", String.valueOf( Math.abs(current_in_millis) ));
+                Log.d("current_in_millis", String.valueOf( Math.abs(startTime_in_millis) ));*/
 
 
                 duration_in_millis = Integer.parseInt(duration)*1000;
@@ -328,15 +376,18 @@ public class AlMusicaFragment extends Fragment {
                 isready = tiempo_transcurrido != 0;
 
                 //SAVING DURATION TO SHARED PREFERENCES
-                SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                //CLEARING SHARED PREFERENCES
-                editor.clear().apply();
-                //PUTTING INT DURATION TO SHARED PREFERENCES
-                editor.putInt("transcurrido", tiempo_transcurrido);
-                editor.putInt("loquefalta", loquefalta);
-                editor.putInt("duracion", duration_in_millis);
-                editor.apply();
+                if(getActivity() != null){
+                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    //CLEARING SHARED PREFERENCES
+                    editor.clear().apply();
+                    //PUTTING INT DURATION TO SHARED PREFERENCES
+                    editor.putInt("transcurrido", tiempo_transcurrido);
+                    editor.putInt("loquefalta", loquefalta);
+                    editor.putInt("duracion", duration_in_millis);
+                    editor.apply();
+                }
+
 
                 //LOGGING DATA TO CONSOLE
                 /*
@@ -346,6 +397,7 @@ public class AlMusicaFragment extends Fragment {
                 Log.d("duracion", String.valueOf(duration_in_millis));
                 Log.d("start", start_time);
                 */
+
                 Log.d("transcurrido",String.valueOf(tiempo_transcurrido));
                 Log.d("loquefalta > ", String.valueOf(loquefalta));
 
@@ -360,6 +412,23 @@ public class AlMusicaFragment extends Fragment {
 
         @Override
         protected void onPostExecute(CurrentMetadataFetcher result) {
+
+            if(getActivity() !=  null){
+                SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
+                int cr_transcurrido = cr_sharedPreferences.getInt("transcurrido", 2000);
+
+                mProgressBar.setColor( ContextCompat.getColor(getActivity(), R.color.bright_teal) );
+                mProgressBar.setProgressBarWidth(10);
+                mProgressBar.setProgress(0);
+                mProgressBar.setProgressWithAnimation(100, Math.abs(cr_loquefalta) );
+
+                Log.d("Loquefalta_aqui >>", String.valueOf(  (cr_loquefalta - cr_transcurrido)  ));
+
+            }
+
+
+
 
             String lbl_trackDuration = String.format("%02d:%02d", (duration_in_millis/1000) / 60, (duration_in_millis/1000) % 60);
             //String lbl_trackremain = String.format("%02d:%02d", (tiempo_transcurrido/1000) / 60, (tiempo_transcurrido/1000) % 60);
@@ -383,12 +452,25 @@ public class AlMusicaFragment extends Fragment {
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if(getActivity() != null){
+            Log.d("Runnable", "---------------RUN------------");
+            if(getActivity() !=  null){
                 SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                 int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
                 new MetadataFetcher().execute();
                 handler.postDelayed(runnable, cr_loquefalta);
+                Log.d("Runnable > 1", String.valueOf( cr_loquefalta ));
+                Log.d("Runnable", "---------------RUN------------");
             }
+        }
+    };
+
+    int count = 0;
+    private Runnable progressbar_update =  new Runnable() {
+        @Override
+        public void run() {
+                count++;
+                Log.d("contador >>>", String.valueOf(count));
+                handler.postDelayed(progressbar_update, 1000);
         }
     };
 

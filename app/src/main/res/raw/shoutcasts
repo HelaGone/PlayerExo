@@ -1,11 +1,11 @@
 [
   {
     "name" : "AL Radio",
-    "stream" : "http://ec2-52-53-224-224.us-west-1.compute.amazonaws.com:8000/"
+    "stream" : "http://ec2-18-144-70-48.us-west-1.compute.amazonaws.com:8000/"
   },
   {
     "name": "AL Tulúm",
-    "stream": "http://ec2-18-144-70-48.us-west-1.compute.amazonaws.com:8000/"
+    "stream": "http://ec2-52-53-224-224.us-west-1.compute.amazonaws.com:8000/"
   },
   {
     "name": "AL CDMX",

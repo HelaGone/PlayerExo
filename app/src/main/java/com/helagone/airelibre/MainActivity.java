@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity
 
     LinearLayout almusic;
     LinearLayout terms;
+    TextView lbl_emisoras;
 
     TextView titleToolbar;
 
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity
     String _the_time;
 
     Typeface custom_font;
+    Typeface ws_semibold;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         custom_font = Typeface.createFromAsset(getAssets(),  "fonts/WorkSans-Regular.ttf");
+        ws_semibold = Typeface.createFromAsset(getAssets(), "fonts/WorkSans-SemiBold.ttf");
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -126,7 +129,11 @@ public class MainActivity extends AppCompatActivity
         linearLayout = getLayoutInflater();
 
         almusic = navigationView.getHeaderView(0).findViewById(R.id.id_nav_almusic);
+        lbl_emisoras = navigationView.getHeaderView(0).findViewById(R.id.lbl_emisoras);
         terms = navigationView.findViewById(R.id.menu_item_terms);
+
+        lbl_emisoras.setTypeface(ws_semibold);
+
 
         /**
          * TIME SHIFT
@@ -176,6 +183,9 @@ public class MainActivity extends AppCompatActivity
         });
 
         navHeader = navigationView.getHeaderView(0);
+
+        TextView emisoras = navHeader.findViewById(R.id.lbl_emisoras);
+        emisoras.setTypeface(custom_font);
 
 
         // load toolbar titles from string resources
@@ -320,11 +330,12 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //Checking if the item is in checked state or not, if not make it in checked state
+                /*
                 if (menuItem.isChecked()) {
                     menuItem.setChecked(true);
                 } else {
                     menuItem.setChecked(true);
-                }
+                }*/
                 menuItem.setChecked(true);
 
                 loadHomeFragment();
@@ -457,6 +468,7 @@ public class MainActivity extends AppCompatActivity
     public void onFragmentInteraction(String stringurl) {
         if(TextUtils.isEmpty(stringurl)) return;
         radioManager.playOrPause(stringurl);
+
     }
 
     @Override
