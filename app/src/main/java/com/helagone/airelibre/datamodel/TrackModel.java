@@ -7,13 +7,12 @@ import java.io.Serializable;
  */
 
 public class TrackModel implements Serializable {
-    private String trk_title, trk_album, trk_artist, trk_duration;
+    private String trk_title, trk_artist, trk_duration;
 
-    public TrackModel(String title, String album, String artist){
+    public TrackModel(String title, String artist, String duration){
         this.trk_title = title;
-        this.trk_album = album;
         this.trk_artist = artist;
-        //this.trk_duration = duration;
+        this.trk_duration = duration;
     }
 
     public String getTrk_title(){
@@ -23,11 +22,11 @@ public class TrackModel implements Serializable {
         this.trk_artist = title;
     }
 
-    public String getTrk_album(){
-        return trk_album;
+    public String getTrk_duration(){
+        return trk_duration;
     }
-    public void setTrk_album(String album){
-        this.trk_album = album;
+    public void setTrk_duration(String album){
+        this.trk_duration = album;
     }
 
     public String getTrk_artist(){

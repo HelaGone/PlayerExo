@@ -137,6 +137,7 @@ public class MainActivity extends AppCompatActivity
         toolbar.setBackgroundColor(ContextCompat.getColor(this, R.color.toolbar_bg));
 
 
+
         /**
          * TIME SHIFT
          */
