@@ -53,6 +53,10 @@
     <string name="action_mark_all_read">Mark All as Read</string>
     <string name="privacy_policy">Privacy Policy</string>
 
+    <!--FAVORITOS-->
+    <string name="lbl_favs_empty">¡Aquí aparecerán tus canciones favoritas!</string>
+    <string name="lbl_favs_empty_2">Da click en el corazón &#10084; para empezar a agregar canciones a tu lista</string>
+
 
     <!--NOSOTROS -->
     <string name="txt_description">The term &quot;radio&quot; is derived from the Latin word &quot;radius&quot;, meaning &quot;spoke of a wheel, beam of light, ray&quot;. It was first applied to communications in 1881.</string>
