@@ -54,9 +54,6 @@ public class ScheduleActivity extends AppCompatActivity implements AppBarLayout.
     JSONArray nwJsonArray;
 
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

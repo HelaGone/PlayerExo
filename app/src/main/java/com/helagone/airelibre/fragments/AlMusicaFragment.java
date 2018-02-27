@@ -26,6 +26,7 @@ import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.activity.ScheduleActivity;
@@ -130,6 +131,8 @@ public class AlMusicaFragment extends Fragment {
     String _the_time;
     String tracksStr;
 
+    DefaultTimeBar defaultTimeBar;
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -183,6 +186,9 @@ public class AlMusicaFragment extends Fragment {
         time_duration.setTypeface(custom_font);
         spacer_pipe.setTypeface(custom_font);
 
+
+
+
         SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
         int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
 
@@ -213,6 +219,7 @@ public class AlMusicaFragment extends Fragment {
         }
 
         toolbar = getActivity().findViewById(R.id.toolbar);
+        menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
 
         for(int i=0; i<toolbar.getChildCount(); i++){
             final View v = toolbar.getChildAt(i);
