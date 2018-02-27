@@ -222,7 +222,7 @@ public class AlMusicaFragment extends Fragment {
 
                 shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                 //artistName.setText(shoutcasts.get(0).getName());
-                streamURL = shoutcasts.get(2).getUrl();
+                streamURL = shoutcasts.get(0).getUrl();
 
                 //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                 mListener.onFragmentInteraction(streamURL);
@@ -344,7 +344,7 @@ public class AlMusicaFragment extends Fragment {
 
 
                 //FETCHING METADATA FROM URL
-                lametadata = fetchMetadata.run("http://s45.myradiostream.com:13114/currentsong?sid=1");
+                lametadata = fetchMetadata.run("http://ec2-18-144-70-48.us-west-1.compute.amazonaws.com:8000/currentsong?sid=1");
                 meta_parts = lametadata.split("_-_");
                 artist_name = meta_parts[0];
                 track_name = meta_parts[1];
