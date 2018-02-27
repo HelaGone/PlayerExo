@@ -286,11 +286,8 @@ public class MainActivity extends AppCompatActivity
 
 
     private void setToolbarTitle() {
-
         TextView titleTollbar = findViewById(R.id.titleToolbar);
         titleTollbar.setText(activityTitles[navItemIndex]);
-
-        //getSupportActionBar().setTitle(activityTitles[navItemIndex]);
     }
 
     private void selectNavMenu() {

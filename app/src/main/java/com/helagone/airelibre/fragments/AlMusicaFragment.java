@@ -2,9 +2,11 @@ package com.helagone.airelibre.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +21,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -113,19 +116,10 @@ public class AlMusicaFragment extends Fragment {
     Typeface ws_semibold;
 
     MetadataFetcher metadataFetcher;
-
     RadioManager radioManager;
+    Drawable menu_night;
+    Toolbar toolbar;
 
-
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -149,10 +143,8 @@ public class AlMusicaFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            //get arguments
         }
-
 
         shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
         radioManager = new RadioManager(getActivity());
@@ -187,6 +179,7 @@ public class AlMusicaFragment extends Fragment {
         handler.postDelayed(runnable, cr_loquefalta);
 
 
+
         //HANDLING TIME OF THE DAY
 
         if(limit > 1800 || limit < 700 ){
@@ -199,11 +192,24 @@ public class AlMusicaFragment extends Fragment {
             time_remain.setTextColor(getResources().getColor(R.color.cool_grey));
             spacer_pipe.setTextColor(getResources().getColor(R.color.cool_grey));
 
+            menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
+
             try{
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.dark));
             }catch(NullPointerException nex){
                 nex.printStackTrace();
             }
+        }
+
+        toolbar = getActivity().findViewById(R.id.toolbar);
+
+        for(int i=0; i<toolbar.getChildCount(); i++){
+            final View v = toolbar.getChildAt(i);
+
+            if(v instanceof ImageButton) {
+                ((ImageButton)v).setImageDrawable(menu_night);
+            }
+
         }
 
 
@@ -222,7 +228,7 @@ public class AlMusicaFragment extends Fragment {
 
                 shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                 //artistName.setText(shoutcasts.get(0).getName());
-                streamURL = shoutcasts.get(0).getUrl();
+                streamURL = shoutcasts.get(1).getUrl();
 
                 //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                 mListener.onFragmentInteraction(streamURL);

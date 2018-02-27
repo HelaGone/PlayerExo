@@ -2,6 +2,7 @@ package com.helagone.airelibre.activity;
 
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,8 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -22,7 +25,6 @@ import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.datafetch.ProgramFetcher;
 import com.helagone.airelibre.datamodel.DataModel;
-import com.helagone.airelibre.datamodel.TrackModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,39 +33,46 @@ public class ScheduleActivity extends AppCompatActivity implements AppBarLayout.
     private List<DataModel> trackItem_list = new ArrayList<>();
     RecyclerView recyclerView;
     Toolbar toolbar;
-    ImageButton btn_close;
+    Drawable menu_close;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
-
-
+        menu_close = getResources().getDrawable(R.drawable.ic_close);
         toolbar = findViewById(R.id.toolbar);
-        //toolbar.setTitle(getResources().getString(R.string.txt_dummy));
-
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        btn_close = toolbar.findViewById(R.id.id_btn_close);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         recyclerView = findViewById(R.id.id_scedule_list);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 1));
 
-
-        btn_close.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent( getBaseContext(),  MainActivity.class);
-                startActivity(intent);
+        for(int i=0; i<toolbar.getChildCount(); i++){
+            final View v = toolbar.getChildAt(i);
+            if(v instanceof ImageButton) {
+                ((ImageButton)v).setImageDrawable(menu_close);
             }
-        });
-
-
-
+        }
 
         new FetchMetadataTask().execute();
     }
+
+
+    @Override public boolean onOptionsItemSelected(MenuItem item){
+        super.onOptionsItemSelected(item);
+
+        switch (item.getItemId()){
+            case android.R.id.home :
+                Intent intent = new Intent(ScheduleActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
 
     @Override
     public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {

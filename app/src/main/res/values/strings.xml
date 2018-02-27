@@ -25,11 +25,11 @@
         <item>AL Música</item>
         <item>AL CDMX</item>
         <item>AL Tulúm</item>
-        <item>Programación</item>
-        <item>Favoritos</item>
-        <item>Nosotros</item>
-        <item>Contacto</item>
-        <item>Términios &amp; Condiciones</item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
+        <item></item>
     </string-array>
 
     <string name="nav_share">Compartir</string>
@@ -53,7 +53,14 @@
     <string name="action_mark_all_read">Mark All as Read</string>
     <string name="privacy_policy">Privacy Policy</string>
 
+
+    <!--NOSOTROS -->
+    <string name="txt_description">The term &quot;radio&quot; is derived from the Latin word &quot;radius&quot;, meaning &quot;spoke of a wheel, beam of light, ray&quot;. It was first applied to communications in 1881.</string>
+    <string name="txt_radio_description">The switch to &quot;radio&quot; in place of &quot;wireless&quot; took place slowly and unevenly in the English-speaking world. Lee de Forest helped popularize the new word in the United States—in early 1907 he founded the DeForest Radio Telephone Company, and his letter in the June 22, 1907 Electrical World about the need for legal restrictions warned that &quot;Radio chaos will certainly be the result until such stringent regulation is enforced&quot;.</string>
+    <string name="sub_radio">Radio.</string>
+
+
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
 </resources>

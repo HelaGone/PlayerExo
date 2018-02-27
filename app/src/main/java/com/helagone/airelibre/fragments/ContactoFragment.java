@@ -1,10 +1,12 @@
 package com.helagone.airelibre.fragments;
 
+
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,8 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.helagone.airelibre.R;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,16 +27,11 @@ import com.helagone.airelibre.R;
  * create an instance of this fragment.
  */
 public class ContactoFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    Toolbar toolbar;
+    AppBarLayout appBarLayout;
 
     public ContactoFragment() {
         // Required empty public constructor
@@ -52,8 +49,8 @@ public class ContactoFragment extends Fragment {
     public static ContactoFragment newInstance(String param1, String param2) {
         ContactoFragment fragment = new ContactoFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString("", param1);
+        args.putString("", param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,6 +59,12 @@ public class ContactoFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(getResources().getColor(R.color.blanco));
+
+        appBarLayout = getActivity().findViewById(R.id.nav_appbar);
+        appBarLayout.setElevation(0);
     }
 
     @Override
@@ -69,11 +72,13 @@ public class ContactoFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_contacto, container, false);
+        view.setBackground( getResources().getDrawable(R.color.blanco) );
 
-        TextView lbl_brief = (TextView) view.findViewById(R.id.txt_brief);
+
+        TextView lbl_brief = view.findViewById(R.id.txt_brief);
         lbl_brief.setTextColor(getResources().getColor(R.color.slate_grey));
 
-        Button sendmail = (Button)view.findViewById(R.id.email_button);
+        Button sendmail = view.findViewById(R.id.email_button);
         sendmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -101,6 +106,15 @@ public class ContactoFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         menu.clear();
     }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+
+
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(View v) {

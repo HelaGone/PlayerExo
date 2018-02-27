@@ -1,13 +1,86 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.helagone.airelibre.fragments.UsFragment">
+<ScrollView
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context="com.helagone.airelibre.fragments.UsFragment"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:fillViewport="true">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="NOSOTROS" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</FrameLayout>
+
+        <TextView
+            android:id="@+id/txt_nosotros"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:gravity="left"
+            android:lineSpacingExtra="8sp"
+            android:text="@string/nav_us"
+            android:textColor="@color/dark_grey_blue"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/lil_greenbar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/bottom_border" />
+
+        <TextView
+            android:id="@+id/txt_desc_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="32dp"
+            android:gravity="start"
+            android:layout_gravity="center"
+            android:lineSpacingExtra="8sp"
+            android:text="@string/txt_description"
+            android:textColor="@color/slate_grey"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="16dp"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif"
+            android:text="@string/sub_radio"
+            android:gravity="start"
+            android:textColor="@color/dark_grey_blue"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:typeface="sans"
+            android:visibility="visible"
+            tools:text="@string/sub_radio" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:fontFamily="sans-serif"
+            android:lineSpacingExtra="8sp"
+            android:text="@string/txt_radio_description"
+            android:textColor="@color/slate_grey"
+            android:textSize="16sp"
+            android:typeface="normal"
+            tools:text="@string/txt_radio_description" />
+
+    </LinearLayout>
+</ScrollView>
+
