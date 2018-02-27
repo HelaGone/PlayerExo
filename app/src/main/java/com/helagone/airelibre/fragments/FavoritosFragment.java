@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,10 +19,10 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
 
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.datamodel.FavsDataModel;
-import com.helagone.airelibre.datamodel.TrackModel;
 import com.helagone.airelibre.interaction.RecyclerItemClickListener;
 
 import org.json.JSONArray;
@@ -50,6 +51,7 @@ public class FavoritosFragment extends Fragment {
     SharedPreferences.Editor editor_favs;
 
     AppBarLayout appBarLayout;
+    Toolbar toolbar;
 
 
     private OnFragmentInteractionListener mListener;
@@ -83,8 +85,20 @@ public class FavoritosFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        toolbar = getActivity().findViewById(R.id.toolbar);
+        toolbar.setBackground(getResources().getDrawable(R.color.transparente));
+
+        for(int i=0; i<toolbar.getChildCount(); i++){
+            View v = toolbar.getChildAt(i);
+
+            if(v instanceof ImageButton){
+                ((ImageButton)v).setImageDrawable(getResources().getDrawable(R.drawable.ic_menu_night));
+            }
+        }
+
         appBarLayout = getActivity().findViewById(R.id.nav_appbar);
         appBarLayout.setElevation(0);
+        appBarLayout.setBackground(getResources().getDrawable(R.color.transparente));
     }
 
     @Override
@@ -106,7 +120,7 @@ public class FavoritosFragment extends Fragment {
                         @Override
                         public void onItemClick(View view, int position) {
                             //Log.d("upvote", "click here");
-                            ImageButton favHeart = (ImageButton) view.findViewById(R.id.ic_like_heart);
+                            ImageButton favHeart = view.findViewById(R.id.ic_like_heart);
                             favHeart.setImageResource(R.drawable.ic_icon_heart_empty);
 
                             editor_favs = thepreferences.edit();
@@ -158,7 +172,7 @@ public class FavoritosFragment extends Fragment {
                             }//END ITERATION
 
                             String vts_clean = valuesToSave.substring(1);
-                            //Log.d("upvote > fin", vts_clean);
+                            Log.d("upvote > fin", vts_clean);
 
                             editor_favs.putString("trackSet", vts_clean).apply();
 

@@ -12,33 +12,33 @@ import android.widget.AdapterView;
  */
 
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
-    private AdapterView.OnItemClickListener mListener;
-    private GestureDetector mGestureDetector;
+    private OnItemClickListener mListener;
 
     public interface OnItemClickListener{
         public void onItemClick(View view, int position);
-    }//ON ITEM CLICK LISTENER
+    }
+    //ON ITEM CLICK LISTENER
+
+    GestureDetector mGestureDetector;
 
     public RecyclerItemClickListener(Context context, OnItemClickListener listener){
-        mListener = (AdapterView.OnItemClickListener) listener;
+        mListener = listener;
         mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener(){
             @Override
             public boolean onSingleTapUp(MotionEvent e){
                 return true;
             }
         });
-    }//END RECYCLER ITEM CLICK LISTENER
-
-
+    }
+    //END RECYCLER ITEM CLICK LISTENER
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
         View childView = rv.findChildViewUnder( e.getX(), e.getY() );
 
         if(childView != null && mListener != null && mGestureDetector.onTouchEvent(e)){
-            
+            mListener.onItemClick(childView, rv.getChildAdapterPosition(childView));
         }
-
         return false;
     }
 

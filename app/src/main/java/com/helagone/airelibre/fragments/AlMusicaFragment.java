@@ -22,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
+import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -34,6 +35,9 @@ import com.helagone.airelibre.service.RadioManager;
 import com.helagone.airelibre.utility.Shoutcast;
 import com.helagone.airelibre.utility.ShoutcastHelper;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -63,6 +67,7 @@ public class AlMusicaFragment extends Fragment {
     ImageView coverart;
 
     Button gotoPlaylist;
+    ToggleButton likeEmpty;
     TextView artistName;
     TextView time_remain;
     TextView time_duration;
@@ -104,11 +109,9 @@ public class AlMusicaFragment extends Fragment {
     Date d_current_date;
     SimpleDateFormat thedateFormat =  new SimpleDateFormat("HH:mm", Locale.getDefault());
     public int limit;
-    String _the_time;
 
-    Boolean yesno = true;
     Boolean isready = false;
-    Boolean cancelled = false;
+    Boolean addTo = false;
 
     public ArrayList<TrackModel> oneTrackModels =  new ArrayList<>();
 
@@ -119,6 +122,13 @@ public class AlMusicaFragment extends Fragment {
     RadioManager radioManager;
     Drawable menu_night;
     Toolbar toolbar;
+
+    SharedPreferences shPreferences;
+    SharedPreferences.Editor editor;
+    String sharedString;
+
+    String _the_time;
+    String tracksStr;
 
 
     private OnFragmentInteractionListener mListener;
@@ -165,6 +175,7 @@ public class AlMusicaFragment extends Fragment {
         time_remain = fragmentView.findViewById(R.id.lbl_timeremain);
         time_duration = fragmentView.findViewById(R.id.lbl_trDur);
         spacer_pipe = fragmentView.findViewById(R.id.lbl_item_separador);
+        likeEmpty = fragmentView.findViewById(R.id.likeEmpty);
 
         gotoPlaylist.setTypeface(ws_semibold);
         artistName.setTypeface(custom_font);
@@ -249,6 +260,83 @@ public class AlMusicaFragment extends Fragment {
                 Glide.with(getActivity()).load(coverUrl).apply(options).into(coverart);
             }
         }
+
+
+        /*
+         *  CLICK TO UP VOTE
+         */
+        likeEmpty.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Log.d("like_click", "click here");
+                //VARIABLES
+                String _trackArtist = (String) artistName.getText();
+                String _trackName = (String) gotoPlaylist.getText();
+                String _trackAlbumName = (String) gotoPlaylist.getText();
+                String _trackDuration = (String) time_duration.getText();
+
+                shPreferences = getActivity().getSharedPreferences("tracksSet", Context.MODE_PRIVATE);
+                sharedString = shPreferences.getString("trackSet", null);
+                editor = shPreferences.edit();
+
+                //ANALYTICS
+                /*Bundle bundle4 = new Bundle();
+                bundle4.putString(FirebaseAnalytics.Param.ITEM_NAME, _trackName);
+                bundle4.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "music_like");
+                mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle4);*/
+                //END VARIABLES
+
+                if( shPreferences.getAll().isEmpty() ){
+                    //Log.d("shp", "Está vacío");
+                    JSONObject jsonObjectTrack =  new JSONObject();
+                    try{
+                        jsonObjectTrack.put("_artistName", _trackArtist);
+                        jsonObjectTrack.put("_trackName", _trackName);
+                        jsonObjectTrack.put("_trackDur", _trackDuration);
+                        tracksStr += jsonObjectTrack.toString();
+                        String cleanToUp = tracksStr.replace("null", "");
+                        //Log.d("cleanToUp", cleanToUp);
+                        editor.putString("trackSet", cleanToUp).apply();
+
+                        String retTrackSet = shPreferences.getString("trackSet", null);
+                        //Log.d("retTrackSet", retTrackSet);
+
+                    }catch(JSONException jsex){
+                        jsex.printStackTrace();
+                    }
+                }else{
+                    String trackSet = shPreferences.getString( "trackSet", null);
+                    String replaceTrackSet = trackSet.replace("null", "");
+                    String[] arr_str = replaceTrackSet.split("([}])");
+                    for(String s: arr_str){
+                        String cleanStr = s.replace(",{", "{");
+                        try {
+                            JSONObject oneObj = new JSONObject(cleanStr+"}");
+                            if(oneObj.getString("_artistName").equals(_trackArtist) && oneObj.getString("_trackName").equals(_trackName)){
+                                addTo = false;
+                            }else{
+                                addTo = true;
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    JSONObject newjsonObjectTrack =  new JSONObject();
+                    try{
+                        newjsonObjectTrack.put("_artistName", _trackArtist);
+                        newjsonObjectTrack.put("_trackName", _trackName);
+                        newjsonObjectTrack.put("_trackDur", _trackDuration);
+                        if(addTo){
+                            replaceTrackSet += ","+newjsonObjectTrack;
+                            editor.putString("trackSet", replaceTrackSet).apply();
+                        }
+                    }catch(JSONException jsex){
+                        jsex.printStackTrace();
+                    }
+                }//END SHARED PREFERENCES TEST
+            }
+        });//END ON CLICK LISTENER LIKE EMPTY
+
 
 
         // Inflate the layout for this fragment
