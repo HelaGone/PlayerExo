@@ -194,18 +194,12 @@ public class AlMusicaFragment extends Fragment {
         time_duration.setTypeface(custom_font);
         spacer_pipe.setTypeface(custom_font);
 
-
         SharedPreferences sh_prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         //handler.postDelayed(progressbar_update, 1000);
         handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
 
-
-
-
-
         //HANDLING TIME OF THE DAY
-
         if(limit > 1800 || limit < 700 ){
             //Log.d("limit", String.valueOf(limit));
             fragmentView.setBackground(getResources().getDrawable(R.color.dark));
@@ -238,8 +232,6 @@ public class AlMusicaFragment extends Fragment {
 
 
         SharedPreferences dw_sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-
-        //int sh_loquefalta = dw_sharedPrefs.getInt("loquefalta", 2000);
         int sh_transcurrido = dw_sharedPrefs.getInt("transcurrido", 2000);
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
         transc_to_cent = sh_transcurrido*100/sh_duracion;
@@ -291,7 +283,6 @@ public class AlMusicaFragment extends Fragment {
         likeEmpty.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Log.d("like_click", "click here");
                 //VARIABLES
                 String _trackArtist = (String) artistName.getText();
                 String _trackName = (String) gotoPlaylist.getText();
@@ -310,7 +301,6 @@ public class AlMusicaFragment extends Fragment {
                 //END VARIABLES
 
                 if( shPreferences.getAll().isEmpty() ){
-                    //Log.d("shp", "Está vacío");
                     JSONObject jsonObjectTrack =  new JSONObject();
                     try{
                         jsonObjectTrack.put("_artistName", _trackArtist);
@@ -318,11 +308,9 @@ public class AlMusicaFragment extends Fragment {
                         jsonObjectTrack.put("_trackDur", _trackDuration);
                         tracksStr += jsonObjectTrack.toString();
                         String cleanToUp = tracksStr.replace("null", "");
-                        //Log.d("cleanToUp", cleanToUp);
                         editor.putString("trackSet", cleanToUp).apply();
 
                         String retTrackSet = shPreferences.getString("trackSet", null);
-                        //Log.d("retTrackSet", retTrackSet);
 
                     }catch(JSONException jsex){
                         jsex.printStackTrace();
@@ -373,7 +361,6 @@ public class AlMusicaFragment extends Fragment {
 
 
 
-
     /**
      * RUNNABLE UPDATE METADATA IN UI
      */
@@ -399,18 +386,17 @@ public class AlMusicaFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
                     time_remain.setText(updTimer());
-                    //Log.d("transc", updTimer() );
                 }
             });
         }
     }
 
     private String updTimer (){
-        tiempo_transcurrido++;
-        Log.d("trans", String.valueOf( tiempo_transcurrido ));
-        String upd_timer = String.format(Locale.getDefault(),"%02d:%02d", tiempo_transcurrido/1000/60, tiempo_transcurrido/1000 % 60 );
+        tiempo_transcurrido=tiempo_transcurrido+1000;
+        int minutos = tiempo_transcurrido/1000/60;
+        int segundos = tiempo_transcurrido/1000 % 60;
+        String upd_timer = String.format(Locale.getDefault(),"%02d:%02d", minutos, segundos );
         return upd_timer;
     }
 
