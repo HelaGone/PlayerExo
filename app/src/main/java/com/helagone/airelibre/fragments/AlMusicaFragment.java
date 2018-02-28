@@ -262,7 +262,7 @@ public class AlMusicaFragment extends Fragment {
 
                 shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                 //artistName.setText(shoutcasts.get(0).getName());
-                streamURL = shoutcasts.get(1).getUrl();
+                streamURL = shoutcasts.get(0).getUrl();
 
                 //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                 mListener.onFragmentInteraction(streamURL);
@@ -399,16 +399,19 @@ public class AlMusicaFragment extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    updTimer();
+
+                    time_remain.setText(updTimer());
+                    //Log.d("transc", updTimer() );
                 }
             });
         }
     }
 
-    private void updTimer (){
+    private String updTimer (){
         tiempo_transcurrido++;
-        Log.d("transc", String.valueOf(tiempo_transcurrido));
-        time_remain.setText(String.format(Locale.getDefault(),"%02d:%02d", tiempo_transcurrido/1000/60, tiempo_transcurrido/1000 % 60 ));
+        Log.d("trans", String.valueOf( tiempo_transcurrido ));
+        String upd_timer = String.format(Locale.getDefault(),"%02d:%02d", tiempo_transcurrido/1000/60, tiempo_transcurrido/1000 % 60 );
+        return upd_timer;
     }
 
 
