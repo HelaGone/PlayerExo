@@ -16,17 +16,28 @@
         android:roundIcon="@mipmap/logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <service android:name=".service.RadioService" />
 
         <activity
-            android:name=".MainActivity">
+            android:name=".splash.SplashActivity"
+            android:label="@string/title_activity_splash"
+            android:theme="@style/AppTheme">
+
+            <intent-filter>
+
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+
+            </intent-filter>
+
+        </activity>
+
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <!--
@@ -42,12 +53,10 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".activity.TermsActivity" />
-
+        <activity android:name=".activity.TermsActivity" />
         <activity
             android:name=".activity.ScheduleActivity"
-            android:theme="@style/AppTheme.NoActionBar.noPrimaryColor"/>
+            android:theme="@style/AppTheme.NoActionBar.noPrimaryColor" />
 
     </application>
 

@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -133,6 +136,11 @@ public class AlMusicaFragment extends Fragment {
 
     DefaultTimeBar defaultTimeBar;
 
+    int count; //For progress bar
+    int transc_to_cent;
+    Timer timer;
+
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -187,13 +195,12 @@ public class AlMusicaFragment extends Fragment {
         spacer_pipe.setTypeface(custom_font);
 
 
-
-
-        SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-        int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
+        SharedPreferences sh_prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         //handler.postDelayed(progressbar_update, 1000);
-        handler.postDelayed(runnable, cr_loquefalta);
+        handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
+
+
 
 
 
@@ -227,8 +234,17 @@ public class AlMusicaFragment extends Fragment {
             if(v instanceof ImageButton) {
                 ((ImageButton)v).setImageDrawable(menu_night);
             }
-
         }
+
+
+        SharedPreferences dw_sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
+
+        //int sh_loquefalta = dw_sharedPrefs.getInt("loquefalta", 2000);
+        int sh_transcurrido = dw_sharedPrefs.getInt("transcurrido", 2000);
+        int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
+        transc_to_cent = sh_transcurrido*100/sh_duracion;
+
+        Log.d("tres >>", String.valueOf(transc_to_cent) );
 
 
         trigger.setOnClickListener(new View.OnClickListener() {
@@ -346,9 +362,70 @@ public class AlMusicaFragment extends Fragment {
 
 
 
+        timer = new Timer();
+        timer.schedule(new timerUpdTask(), 0, 1000);
+
+
+
         // Inflate the layout for this fragment
         return fragmentView;
     }//END ON CREATE
+
+
+
+
+    /**
+     * RUNNABLE UPDATE METADATA IN UI
+     */
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d("Runnable", "---------------RUN------------");
+            if(getActivity() !=  null){
+                SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
+                int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
+                new MetadataFetcher().execute();
+                handler.postDelayed(runnable, cr_loquefalta);
+                Log.d("Loquefalta > 1", String.valueOf( cr_loquefalta ));
+                Log.d("Runnable", "---------------RUN------------");
+            }
+        }
+    };
+
+
+    private class timerUpdTask extends TimerTask{
+        @Override
+        public void run() {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    updTimer();
+                }
+            });
+        }
+    }
+
+    private void updTimer (){
+        tiempo_transcurrido++;
+        Log.d("transc", String.valueOf(tiempo_transcurrido));
+        time_remain.setText(String.format(Locale.getDefault(),"%02d:%02d", tiempo_transcurrido/1000/60, tiempo_transcurrido/1000 % 60 ));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(String uri) {
@@ -384,8 +461,10 @@ public class AlMusicaFragment extends Fragment {
     @Override
     public void onPause(){
         super.onPause();
-        handler.removeCallbacks(progressbar_update);
+        //handler.removeCallbacks(progressbar_update);
         handler.removeCallbacks(runnable);
+        timer.cancel();
+        timer.purge();
     }
 
     @Override
@@ -406,15 +485,19 @@ public class AlMusicaFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        handler.removeCallbacks(progressbar_update);
+        //handler.removeCallbacks(progressbar_update);
         handler.removeCallbacks(runnable);
+        timer.cancel();
+        timer.purge();
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
-        handler.removeCallbacks(progressbar_update);
+        //handler.removeCallbacks(progressbar_update);
         handler.removeCallbacks(runnable);
+        timer.cancel();
+        timer.purge();
     }
 
 
@@ -478,8 +561,8 @@ public class AlMusicaFragment extends Fragment {
 
                 //SAVING DURATION TO SHARED PREFERENCES
                 if(getActivity() != null){
-                    SharedPreferences sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    SharedPreferences sharedPreferences_trackinfo = getActivity().getPreferences(Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences_trackinfo.edit();
                     //CLEARING SHARED PREFERENCES
                     editor.clear().apply();
                     //PUTTING INT DURATION TO SHARED PREFERENCES
@@ -497,11 +580,9 @@ public class AlMusicaFragment extends Fragment {
                 Log.d("album", album_name);
                 Log.d("duracion", String.valueOf(duration_in_millis));
                 Log.d("start", start_time);
-                */
-
                 Log.d("transcurrido",String.valueOf(tiempo_transcurrido));
                 Log.d("loquefalta > ", String.valueOf(loquefalta));
-
+                */
 
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
@@ -518,26 +599,32 @@ public class AlMusicaFragment extends Fragment {
                 SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                 int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
                 int cr_transcurrido = cr_sharedPreferences.getInt("transcurrido", 2000);
+                int cr_duracion = cr_sharedPreferences.getInt("duracion", 2000);
+
+                int topercent = cr_transcurrido*100/cr_duracion;
 
                 mProgressBar.setColor( ContextCompat.getColor(getActivity(), R.color.bright_teal) );
                 mProgressBar.setProgressBarWidth(10);
-                mProgressBar.setProgress(0);
+                mProgressBar.setProgress(topercent);
                 mProgressBar.setProgressWithAnimation(100, Math.abs(cr_loquefalta) );
 
                 Log.d("Loquefalta_aqui >>", String.valueOf(  (cr_loquefalta - cr_transcurrido)  ));
-
             }
 
 
-
-
             String lbl_trackDuration = String.format("%02d:%02d", (duration_in_millis/1000) / 60, (duration_in_millis/1000) % 60);
-            //String lbl_trackremain = String.format("%02d:%02d", (tiempo_transcurrido/1000) / 60, (tiempo_transcurrido/1000) % 60);
+            String lbl_trackremain = String.format("%02d:%02d", (tiempo_transcurrido/1000) / 60, (tiempo_transcurrido/1000) % 60);
 
             artistName.setText(artist_name);
             gotoPlaylist.setText(track_name);
             time_duration.setText(lbl_trackDuration);
-            //t_remaining.setText(lbl_trackremain);
+
+
+            //time_remain.setText(lbl_trackremain);
+
+
+
+
 
             if(getActivity() != null){
                 RequestOptions options = new RequestOptions();
@@ -547,33 +634,18 @@ public class AlMusicaFragment extends Fragment {
         }//END ON POST EXECUTE
     }//END ASYNC TASK
 
-    /**
-     * RUNNABLE UPDATE METADATA IN UI
-     */
-    private Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            Log.d("Runnable", "---------------RUN------------");
-            if(getActivity() !=  null){
-                SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
-                int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
-                new MetadataFetcher().execute();
-                handler.postDelayed(runnable, cr_loquefalta);
-                Log.d("Runnable > 1", String.valueOf( cr_loquefalta ));
-                Log.d("Runnable", "---------------RUN------------");
-            }
-        }
-    };
 
-    int count = 0;
-    private Runnable progressbar_update =  new Runnable() {
-        @Override
-        public void run() {
-                count++;
-                Log.d("contador >>>", String.valueOf(count));
-                handler.postDelayed(progressbar_update, 1000);
-        }
-    };
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * This interface must be implemented by activities that contain this

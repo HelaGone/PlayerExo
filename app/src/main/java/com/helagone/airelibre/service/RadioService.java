@@ -392,4 +392,9 @@ public class RadioService extends Service implements
     }
 
 
+    public int getCurrentPosition(){
+        return (int) exoPlayer.getCurrentPosition();
+    }
+
+
 }

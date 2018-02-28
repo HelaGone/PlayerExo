@@ -48,6 +48,15 @@ public class RadioManager {
         return false;
     }
 
+    public int getCurrentPosition(){
+
+        if(service != null){
+            return service.getCurrentPosition();
+        }
+
+        return 0;
+    }
+
     public void bind() {
 
         Intent intent = new Intent(context, RadioService.class);

@@ -13,6 +13,8 @@ import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
 
@@ -40,7 +42,7 @@ public class MediaNotificationManager {
 
     public void startNotify(String playbackStatus) {
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher);
+        Bitmap largeIcon = BitmapFactory.decodeResource(resources, R.mipmap.ic_album_image_default);
 
         int icon = R.drawable.ic_pause_white;
         Intent playbackAction = new Intent(service, RadioService.class);
