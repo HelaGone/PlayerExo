@@ -169,6 +169,9 @@ public class AlMusicaFragment extends Fragment {
 
         shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
         radioManager = new RadioManager(getActivity());
+
+        timer = new Timer();
+        timer.schedule(new timerUpdTask(), 0, 1000);
     }
 
     @Override
@@ -197,7 +200,7 @@ public class AlMusicaFragment extends Fragment {
         SharedPreferences sh_prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
 
         //handler.postDelayed(progressbar_update, 1000);
-        handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
+        //handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
 
         //HANDLING TIME OF THE DAY
         if(limit > 1800 || limit < 700 ){
@@ -350,8 +353,7 @@ public class AlMusicaFragment extends Fragment {
 
 
 
-        timer = new Timer();
-        timer.schedule(new timerUpdTask(), 0, 1000);
+
 
 
 
@@ -371,7 +373,7 @@ public class AlMusicaFragment extends Fragment {
             if(getActivity() !=  null){
                 SharedPreferences cr_sharedPreferences = getActivity().getPreferences(Context.MODE_PRIVATE);
                 int cr_loquefalta =  cr_sharedPreferences.getInt("loquefalta", 2000);
-                new MetadataFetcher().execute();
+                //new MetadataFetcher().execute();
                 handler.postDelayed(runnable, cr_loquefalta);
                 Log.d("Loquefalta > 1", String.valueOf( cr_loquefalta ));
                 Log.d("Runnable", "---------------RUN------------");
@@ -396,10 +398,17 @@ public class AlMusicaFragment extends Fragment {
         tiempo_transcurrido=tiempo_transcurrido+1000;
         int minutos = tiempo_transcurrido/1000/60;
         int segundos = tiempo_transcurrido/1000 % 60;
+        if(tiempo_transcurrido >= duration_in_millis){
+            tiempo_transcurrido = 0;
+            runMetadataFetcher();
+        }
         String upd_timer = String.format(Locale.getDefault(),"%02d:%02d", minutos, segundos );
         return upd_timer;
     }
 
+    private void runMetadataFetcher(){
+        new MetadataFetcher().execute();
+    }
 
 
 
@@ -429,7 +438,7 @@ public class AlMusicaFragment extends Fragment {
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
 
-            new MetadataFetcher().execute();
+            runMetadataFetcher();
 
             custom_font = Typeface.createFromAsset(getActivity().getAssets(),  "fonts/WorkSans-Regular.ttf");
             ws_semibold    = Typeface.createFromAsset(getActivity().getAssets(), "fonts/WorkSans-SemiBold.ttf");
@@ -463,6 +472,7 @@ public class AlMusicaFragment extends Fragment {
             if( radioManager.isPlaying() ){
                 trigger.setBackground(getResources().getDrawable(R.color.transparente));
                 trigger.setImageResource(R.color.transparente);
+
             }else{
                 trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
                 trigger.setImageResource(R.drawable.ic_play_arrow_black);
