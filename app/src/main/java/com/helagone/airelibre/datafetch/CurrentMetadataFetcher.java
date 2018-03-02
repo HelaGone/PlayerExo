@@ -22,10 +22,9 @@ public class CurrentMetadataFetcher {
         return response.body().string();
     }
 
-    public String FetchCovers(String trackname, String endpoint){
+    public String FetchCovers(String endpoint){
         String coverUrl = null;
-        String nospaceTrackname = trackname.replace(" ", "_");
-        endpoint = endpoint+ nospaceTrackname;
+        endpoint = endpoint+"?"+System.currentTimeMillis();
         try{
             coverUrl = Uri.parse(endpoint).buildUpon().build().toString();
         }catch(Exception ex){

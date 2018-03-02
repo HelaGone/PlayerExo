@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +24,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
@@ -31,6 +33,7 @@ import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.activity.ScheduleActivity;
+import com.helagone.airelibre.datafetch.CoverFetcher;
 import com.helagone.airelibre.datafetch.CurrentMetadataFetcher;
 import com.helagone.airelibre.datamodel.TrackModel;
 import com.helagone.airelibre.service.RadioManager;
@@ -401,6 +404,7 @@ public class AlMusicaFragment extends Fragment {
         if(tiempo_transcurrido >= duration_in_millis){
             tiempo_transcurrido = 0;
             runMetadataFetcher();
+            putCover();
         }
         String upd_timer = String.format(Locale.getDefault(),"%02d:%02d", minutos, segundos );
         return upd_timer;
@@ -408,6 +412,24 @@ public class AlMusicaFragment extends Fragment {
 
     private void runMetadataFetcher(){
         new MetadataFetcher().execute();
+    }
+
+
+    private void putCover(){
+        Handler coverHandler = new Handler();
+        coverHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //new CoverFetcher().FetchCover("http://lisa.mx/airelibre/al_imagenes/art-00.jpg");
+                RequestOptions options = new RequestOptions();
+                options.circleCrop();
+                Glide.with(getActivity()).load("http://lisa.mx/airelibre/al_imagenes/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+
+
+
+            }
+        }, 2000);
+
     }
 
 
@@ -461,8 +483,8 @@ public class AlMusicaFragment extends Fragment {
         super.onPause();
         //handler.removeCallbacks(progressbar_update);
         handler.removeCallbacks(runnable);
-        timer.cancel();
-        timer.purge();
+        //timer.cancel();
+        //timer.purge();
     }
 
     @Override
@@ -539,7 +561,7 @@ public class AlMusicaFragment extends Fragment {
                 //Get Cover art url
                 cover_endpoint = "http://lisa.mx/airelibre/al_imagenes/art-00.jpg?";
                 //cover_endpoint = setupCoverEndpoint();
-                coverUrl = fetchMetadata.FetchCovers(track_name, cover_endpoint);
+                coverUrl = fetchMetadata.FetchCovers(cover_endpoint);
 
 
                 //DATE OPERATIONS TO GET TRACK REMAINING TIME
@@ -618,18 +640,14 @@ public class AlMusicaFragment extends Fragment {
             gotoPlaylist.setText(track_name);
             time_duration.setText(lbl_trackDuration);
 
-
             //time_remain.setText(lbl_trackremain);
-
-
-
-
 
             if(getActivity() != null){
                 RequestOptions options = new RequestOptions();
                 options.circleCrop();
                 Glide.with(getActivity()).load(coverUrl).apply(options).into(coverart);
             }
+
         }//END ON POST EXECUTE
     }//END ASYNC TASK
 
