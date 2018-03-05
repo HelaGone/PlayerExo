@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
@@ -32,12 +33,15 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.upstream.DefaultAllocator;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.helagone.airelibre.R;
 
 import org.greenrobot.eventbus.EventBus;
+
+import static com.google.android.exoplayer2.DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS;
 
 /**
  * Created by programacion2 on 2/23/18.
@@ -74,6 +78,8 @@ public class RadioService extends Service implements
     private String strAppName;
     private String strLiveBroadcast;
     private String streamUrl;
+
+    private static final int BUFFER_SEGMENT_SIZE = 64 * 1024;
     //END VARIABLES /////////////////////////////////////////////////////////////////
 
 
@@ -331,12 +337,19 @@ public class RadioService extends Service implements
         if (wifiLock != null && !wifiLock.isHeld()) {
             wifiLock.acquire();
         }
+
+        DefaultAllocator allocator = new DefaultAllocator(true, BUFFER_SEGMENT_SIZE);
+        //DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, );
+
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, getClass().getSimpleName()), bandwidthMeter);
         DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
         ExtractorMediaSource mediaSource = new ExtractorMediaSource(Uri.parse(streamUrl), dataSourceFactory, extractorsFactory, handler, null);
         exoPlayer.prepare(mediaSource);
         exoPlayer.setPlayWhenReady(true);
+
+
+
     }
 
     public void resume() {
