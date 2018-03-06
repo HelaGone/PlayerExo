@@ -10,5 +10,9 @@
   {
     "name": "AL CDMX",
     "stream": "http://s45.myradiostream.com:13114/"
+  },
+  {
+    "name": "Mediastream",
+    "stream": "http://radio1.us.mediastre.am/radiodemo1.aac"
   }
 ]

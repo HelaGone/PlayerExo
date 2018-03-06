@@ -1,20 +1,29 @@
 package com.helagone.airelibre.fragments;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellSignalStrengthGsm;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -114,13 +124,14 @@ public class AlMusicaFragment extends Fragment {
     CircularProgressBar mProgressBar;
 
     Date d_current_date;
-    SimpleDateFormat thedateFormat =  new SimpleDateFormat("HH:mm", Locale.getDefault());
+    SimpleDateFormat thedateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
     public int limit;
 
     Boolean isready = false;
     Boolean addTo = false;
+    boolean connected = false;
 
-    public ArrayList<TrackModel> oneTrackModels =  new ArrayList<>();
+    public ArrayList<TrackModel> oneTrackModels = new ArrayList<>();
 
     Typeface custom_font;
     Typeface ws_semibold;
@@ -143,9 +154,8 @@ public class AlMusicaFragment extends Fragment {
     int transc_to_cent;
     Timer timer;
 
-
-
     private OnFragmentInteractionListener mListener;
+
 
     public AlMusicaFragment() {
         // Required empty public constructor
@@ -206,7 +216,7 @@ public class AlMusicaFragment extends Fragment {
         //handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
 
         //HANDLING TIME OF THE DAY
-        if(limit > 1800 || limit < 700 ){
+        if (limit > 1800 || limit < 700) {
             //Log.d("limit", String.valueOf(limit));
             fragmentView.setBackground(getResources().getDrawable(R.color.dark));
 
@@ -218,9 +228,9 @@ public class AlMusicaFragment extends Fragment {
 
             menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
 
-            try{
+            try {
                 ((AppCompatActivity) getActivity()).getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.dark));
-            }catch(NullPointerException nex){
+            } catch (NullPointerException nex) {
                 nex.printStackTrace();
             }
         }
@@ -228,11 +238,11 @@ public class AlMusicaFragment extends Fragment {
         toolbar = getActivity().findViewById(R.id.toolbar);
         menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
 
-        for(int i=0; i<toolbar.getChildCount(); i++){
+        for (int i = 0; i < toolbar.getChildCount(); i++) {
             final View v = toolbar.getChildAt(i);
 
-            if(v instanceof ImageButton) {
-                ((ImageButton)v).setImageDrawable(menu_night);
+            if (v instanceof ImageButton) {
+                ((ImageButton) v).setImageDrawable(menu_night);
             }
         }
 
@@ -240,30 +250,61 @@ public class AlMusicaFragment extends Fragment {
         SharedPreferences dw_sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         int sh_transcurrido = dw_sharedPrefs.getInt("transcurrido", 2000);
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
-        transc_to_cent = sh_transcurrido*100/sh_duracion;
+        transc_to_cent = sh_transcurrido * 100 / sh_duracion;
 
-        Log.d("tres >>", String.valueOf(transc_to_cent) );
+        //Log.d("tres >>", String.valueOf(transc_to_cent) );
+
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            }else{
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 200);
+            }
+        }
+
+        try{
+            WifiManager wifiManager = (WifiManager)getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            int linkSpeed = wifiManager.getConnectionInfo().getRssi();
+            Log.d("strength", String.valueOf(linkSpeed));
+        }catch(NullPointerException nulex){
+            nulex.printStackTrace();
+        }
 
 
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(radioManager != null ){
-                    if(radioManager.isPlaying()){
-                        trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
-                        trigger.setImageResource(R.drawable.ic_play_arrow_black);
-                    }else{
-                        trigger.setBackground(getResources().getDrawable(R.color.transparente));
-                        trigger.setImageResource(R.color.transparente);
+                /*
+                 *  Connectivity manager
+                 */
+                ConnectivityManager connectivityManager = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+                    //we are connected to a network
+                    connected = true;
+                    if(radioManager != null ){
+                        if(radioManager.isPlaying()){
+                            trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+                            trigger.setImageResource(R.drawable.ic_play_arrow_black);
+                        }else{
+                            trigger.setBackground(getResources().getDrawable(R.color.transparente));
+                            trigger.setImageResource(R.color.transparente);
+                        }
                     }
+
+                    //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
+                    shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
+                    //artistName.setText(shoutcasts.get(0).getName());
+                    streamURL = shoutcasts.get(0).getUrl();
+
+                    //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
+                    mListener.onFragmentInteraction(streamURL);
+                }else{
+                    connected = false;
+                    Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
                 }
-
-                shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
-                //artistName.setText(shoutcasts.get(0).getName());
-                streamURL = shoutcasts.get(0).getUrl();
-
-                //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
-                mListener.onFragmentInteraction(streamURL);
             }
         });
 
@@ -423,7 +464,12 @@ public class AlMusicaFragment extends Fragment {
                 //new CoverFetcher().FetchCover("http://lisa.mx/airelibre/al_imagenes/art-00.jpg");
                 RequestOptions options = new RequestOptions();
                 options.circleCrop();
+                //TODO: CHANGE URL TO PROD URL FOR IMAGE COVER
+                //PROD
                 Glide.with(getActivity()).load("http://lisa.mx/airelibre/al_imagenes/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+                //DEV
+                //Glide.with(getActivity()).load("http://lisa.mx/airelibre/hk-images/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+
 
 
 
@@ -547,19 +593,47 @@ public class AlMusicaFragment extends Fragment {
                 storage.storeAudio( oneTrackModels);
                 */
 
-
+                //TODO: cambiar ulr a producción
                 //FETCHING METADATA FROM URL
+                //PROD
                 lametadata = fetchMetadata.run("http://ec2-18-144-70-48.us-west-1.compute.amazonaws.com:8000/currentsong?sid=1");
-                meta_parts = lametadata.split("_-_");
-                artist_name = meta_parts[0];
-                track_name = meta_parts[1];
-                album_name = meta_parts[2];
-                duration = meta_parts[3];
-                start_time = meta_parts[4];
+                //DEV
+                //lametadata = fetchMetadata.run("http://s45.myradiostream.com:13114/currentsong?sid=1");
+
+
+                if(lametadata.equals("")){
+                    //Viene sin metadata, no hacer nada . . .
+                    artist_name = "Aire Libre";
+                    track_name = "Aire Libre";
+                    album_name = "Aire Libre";
+                    duration = "300";
+                    start_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                }else{
+                    //Sí tiene metadata. Ejecutar toda la operación
+                    meta_parts = lametadata.split("_-_");
+                    Log.d("indices", String.valueOf( meta_parts.length ));
+                    if(meta_parts.length > 4){
+                        artist_name = meta_parts[0];
+                        track_name = meta_parts[1];
+                        album_name = meta_parts[2];
+                        duration = meta_parts[3];
+                        start_time = meta_parts[4];
+                    }else{
+                        artist_name = meta_parts[0];
+                        track_name = meta_parts[1];
+                        album_name = meta_parts[2];
+                        duration = "300";
+                        start_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+                    }
+                }
 
 
                 //Get Cover art url
+                //TODO: CAMBIAR URL DE LA IMAGEN A PRODUCCÓN
+                //PROD
                 cover_endpoint = "http://lisa.mx/airelibre/al_imagenes/art-00.jpg?";
+                //DEV
+                //cover_endpoint = "http://lisa.mx/airelibre/hk-images/art-00.jpg?";
                 //cover_endpoint = setupCoverEndpoint();
                 coverUrl = fetchMetadata.FetchCovers(cover_endpoint);
 
@@ -580,13 +654,13 @@ public class AlMusicaFragment extends Fragment {
 
                 isready = tiempo_transcurrido != 0;
 
-                //SAVING DURATION TO SHARED PREFERENCES
+                //SAVING DURATION, TRANSCURRIDO, LOQUE FALTA TO SHARED PREFERENCES
                 if(getActivity() != null){
                     SharedPreferences sharedPreferences_trackinfo = getActivity().getPreferences(Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences_trackinfo.edit();
                     //CLEARING SHARED PREFERENCES
                     editor.clear().apply();
-                    //PUTTING INT DURATION TO SHARED PREFERENCES
+                    //PUTTING INT DURATION, INT TRANSCURRIDO, INT LO QUE FALTA TO SHARED PREFERENCES
                     editor.putInt("transcurrido", tiempo_transcurrido);
                     editor.putInt("loquefalta", loquefalta);
                     editor.putInt("duracion", duration_in_millis);
@@ -629,12 +703,12 @@ public class AlMusicaFragment extends Fragment {
                 mProgressBar.setProgress(topercent);
                 mProgressBar.setProgressWithAnimation(100, Math.abs(cr_loquefalta) );
 
-                Log.d("Loquefalta_aqui >>", String.valueOf(  (cr_loquefalta - cr_transcurrido)  ));
+                //Log.d("Loquefalta_aqui >>", String.valueOf(  (cr_loquefalta - cr_transcurrido)  ));
             }
 
 
-            String lbl_trackDuration = String.format("%02d:%02d", (duration_in_millis/1000) / 60, (duration_in_millis/1000) % 60);
-            String lbl_trackremain = String.format("%02d:%02d", (tiempo_transcurrido/1000) / 60, (tiempo_transcurrido/1000) % 60);
+            String lbl_trackDuration = String.format(Locale.getDefault(), "%02d:%02d", (duration_in_millis/1000) / 60, (duration_in_millis/1000) % 60);
+            String lbl_trackremain = String.format(Locale.getDefault(), "%02d:%02d", (tiempo_transcurrido/1000) / 60, (tiempo_transcurrido/1000) % 60);
 
             artistName.setText(artist_name);
             gotoPlaylist.setText(track_name);

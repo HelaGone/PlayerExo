@@ -1,6 +1,7 @@
 package com.helagone.airelibre.datafetch;
 
 import android.net.Uri;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -19,7 +20,14 @@ public class CurrentMetadataFetcher {
         Request request = new Request.Builder().url(url).build();
         Response response = client.newCall(request).execute();
 
-        return response.body().string();
+        Log.d("larespuesta", String.valueOf(response));
+
+        if(String.valueOf(response).equals( "" )){
+            return "";
+        }else{
+            return response.body().string();
+
+        }
     }
 
     public String FetchCovers(String endpoint){
