@@ -5,25 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellSignalStrengthGsm;
-import android.telephony.TelephonyManager;
+import android.telephony.SignalStrength;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,26 +30,20 @@ import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
-import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.activity.ScheduleActivity;
-import com.helagone.airelibre.datafetch.CoverFetcher;
 import com.helagone.airelibre.datafetch.CurrentMetadataFetcher;
 import com.helagone.airelibre.datamodel.TrackModel;
 import com.helagone.airelibre.service.RadioManager;
 import com.helagone.airelibre.utility.Shoutcast;
 import com.helagone.airelibre.utility.ShoutcastHelper;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -65,9 +54,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -92,12 +78,7 @@ public class AlMusicaFragment extends Fragment {
 
     String coverUrl = "http://lisa.mx/airelibre/al_imagenes/art-00.jpg";
     String streamURL;
-    String title_artist;
-    String trackTitle;
-    String album;
     String cover_endpoint;
-    String trackDur;
-    String startTime;
 
     //FETCH METADATA ///////////////////////////
     String lametadata;
@@ -112,11 +93,6 @@ public class AlMusicaFragment extends Fragment {
     int loquefalta;
     int duration_in_millis;
     int tiempo_transcurrido;
-    int transcurrido;
-    int durarcion;
-    int int_elapsed;
-    int int_duration;
-    int l_transc;
     private Handler handler = new Handler();
 
     private List<Shoutcast> shoutcasts = new ArrayList<>();
@@ -136,7 +112,6 @@ public class AlMusicaFragment extends Fragment {
     Typeface custom_font;
     Typeface ws_semibold;
 
-    MetadataFetcher metadataFetcher;
     RadioManager radioManager;
     Drawable menu_night;
     Toolbar toolbar;
@@ -148,14 +123,14 @@ public class AlMusicaFragment extends Fragment {
     String _the_time;
     String tracksStr;
 
-    DefaultTimeBar defaultTimeBar;
-
-    int count; //For progress bar
     int transc_to_cent;
     Timer timer;
 
     private OnFragmentInteractionListener mListener;
 
+    ConnectivityManager connectivityManager;
+    WifiManager wifiManager;
+    int linkSpeed;
 
     public AlMusicaFragment() {
         // Required empty public constructor
@@ -188,9 +163,7 @@ public class AlMusicaFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View fragmentView = inflater.inflate(R.layout.fragment_al_musica, container, false);
 
         trigger = fragmentView.findViewById(R.id.id_trigger);
@@ -246,65 +219,36 @@ public class AlMusicaFragment extends Fragment {
             }
         }
 
-
         SharedPreferences dw_sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         int sh_transcurrido = dw_sharedPrefs.getInt("transcurrido", 2000);
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
         transc_to_cent = sh_transcurrido * 100 / sh_duracion;
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        //Log.d("tres >>", String.valueOf(transc_to_cent) );
-
-
-        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            }else{
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 200);
-            }
-        }
-
-        try{
-            WifiManager wifiManager = (WifiManager)getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            int linkSpeed = wifiManager.getConnectionInfo().getRssi();
-            Log.d("strength", String.valueOf(linkSpeed));
-        }catch(NullPointerException nulex){
-            nulex.printStackTrace();
-        }
+        
 
 
+
+        connectivityManager = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                 *  Connectivity manager
-                 */
-                ConnectivityManager connectivityManager = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED || connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-                    //we are connected to a network
-                    connected = true;
-                    if(radioManager != null ){
-                        if(radioManager.isPlaying()){
-                            trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
-                            trigger.setImageResource(R.drawable.ic_play_arrow_black);
-                        }else{
-                            trigger.setBackground(getResources().getDrawable(R.color.transparente));
-                            trigger.setImageResource(R.color.transparente);
-                        }
+                if(radioManager != null ){
+                    if(radioManager.isPlaying()){
+                        trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+                        trigger.setImageResource(R.drawable.ic_play_arrow_black);
+                    }else{
+                        trigger.setBackground(getResources().getDrawable(R.color.transparente));
+                        trigger.setImageResource(R.color.transparente);
                     }
-
-                    //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
-                    shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
-                    //artistName.setText(shoutcasts.get(0).getName());
-                    streamURL = shoutcasts.get(0).getUrl();
-
-                    //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
-                    mListener.onFragmentInteraction(streamURL);
-                }else{
-                    connected = false;
-                    Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
                 }
+                //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
+                shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
+                //artistName.setText(shoutcasts.get(0).getName());
+                streamURL = shoutcasts.get(3).getUrl();
+                //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
+                mListener.onFragmentInteraction(streamURL);
+                //////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         });
 
@@ -394,13 +338,6 @@ public class AlMusicaFragment extends Fragment {
                 }//END SHARED PREFERENCES TEST
             }
         });//END ON CLICK LISTENER LIKE EMPTY
-
-
-
-
-
-
-
         // Inflate the layout for this fragment
         return fragmentView;
     }//END ON CREATE
