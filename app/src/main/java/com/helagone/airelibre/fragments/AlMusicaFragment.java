@@ -224,8 +224,38 @@ public class AlMusicaFragment extends Fragment {
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
         transc_to_cent = sh_transcurrido * 100 / sh_duracion;
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+                 * Metering Signal Strength over WIFI
+                 */
+        try{
+            wifiManager = (WifiManager)getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            linkSpeed = wifiManager.getConnectionInfo().getRssi();
+            Log.d("strength", String.valueOf(linkSpeed));
+        }catch(NullPointerException nulex){
+            nulex.printStackTrace();
+        }
 
-        
+                /*
+                 *  Connectivity manager
+                 */
+        if( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65){
+            Toast.makeText(getActivity(), "Tu conexión a internet es buena: "+String.valueOf(linkSpeed)+"dBm", Toast.LENGTH_SHORT).show();
+            connected = true;
+
+        }else{
+            Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
+            connected = false;
+            trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+            trigger.setImageResource(R.drawable.ic_play_arrow_black);
+        }
+
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            connected = true;
+        }else{
+            Log.d("signalS", String.valueOf(linkSpeed));
+        }
+
 
 
 
