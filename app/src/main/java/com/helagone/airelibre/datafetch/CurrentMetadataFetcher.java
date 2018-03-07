@@ -20,7 +20,7 @@ public class CurrentMetadataFetcher {
         Request request = new Request.Builder().url(url).build();
         Response response = client.newCall(request).execute();
 
-        Log.d("larespuesta", String.valueOf(response));
+        //Log.d("larespuesta", String.valueOf(response));
 
         if(String.valueOf(response).equals( "" )){
             return "";

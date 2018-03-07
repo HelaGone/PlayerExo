@@ -18,7 +18,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthGsm;
 import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +34,7 @@ import android.widget.TextView;
 import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
@@ -41,8 +46,10 @@ import com.helagone.airelibre.service.RadioManager;
 import com.helagone.airelibre.utility.Shoutcast;
 import com.helagone.airelibre.utility.ShoutcastHelper;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormat;
@@ -224,46 +231,40 @@ public class AlMusicaFragment extends Fragment {
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
         transc_to_cent = sh_transcurrido * 100 / sh_duracion;
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-                 * Metering Signal Strength over WIFI
-                 */
-        try{
-            wifiManager = (WifiManager)getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
+        //Metering Signal Strength over WIFI in RSSI min -127, max -30
+        try {
+            wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             linkSpeed = wifiManager.getConnectionInfo().getRssi();
             Log.d("strength", String.valueOf(linkSpeed));
-        }catch(NullPointerException nulex){
+        } catch (NullPointerException nulex) {
             nulex.printStackTrace();
         }
 
-                /*
-                 *  Connectivity manager
-                 */
-        if( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65){
-            Toast.makeText(getActivity(), "Tu conexión a internet es buena: "+String.valueOf(linkSpeed)+"dBm", Toast.LENGTH_SHORT).show();
+        /*
+         * Connectivity manager
+         * Getting connection type and connection state
+         * Sending Toast to user to let him know network quality and if he's connected to WiFi
+         */
+        connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
+                (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
+            Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
             connected = true;
-
-        }else{
-            Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(getActivity(), "No hay WiFi", Toast.LENGTH_SHORT).show();
             connected = false;
             trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
             trigger.setImageResource(R.drawable.ic_play_arrow_black);
         }
 
-        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
-            //we are connected to a network
-            connected = true;
-        }else{
-            Log.d("signalS", String.valueOf(linkSpeed));
-        }
 
 
-
-
-        connectivityManager = (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(radioManager != null ){
+                if(radioManager != null && connected){
                     if(radioManager.isPlaying()){
                         trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
                         trigger.setImageResource(R.drawable.ic_play_arrow_black);
@@ -271,13 +272,17 @@ public class AlMusicaFragment extends Fragment {
                         trigger.setBackground(getResources().getDrawable(R.color.transparente));
                         trigger.setImageResource(R.color.transparente);
                     }
+                    //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
+                    shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
+                    //artistName.setText(shoutcasts.get(0).getName());
+                    streamURL = shoutcasts.get(3).getUrl();
+                    //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
+                    mListener.onFragmentInteraction(streamURL);
+                }else{
+                    Log.d("connectivity", "No hay conexión para nettops");
+                    Toast.makeText(getActivity(), "No hay conexión", Toast.LENGTH_SHORT).show();
                 }
-                //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
-                shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
-                //artistName.setText(shoutcasts.get(0).getName());
-                streamURL = shoutcasts.get(3).getUrl();
-                //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
-                mListener.onFragmentInteraction(streamURL);
+
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         });
@@ -578,7 +583,7 @@ public class AlMusicaFragment extends Fragment {
                 }else{
                     //Sí tiene metadata. Ejecutar toda la operación
                     meta_parts = lametadata.split("_-_");
-                    Log.d("indices", String.valueOf( meta_parts.length ));
+                    //Log.d("indices", String.valueOf( meta_parts.length ));
                     if(meta_parts.length > 4){
                         artist_name = meta_parts[0];
                         track_name = meta_parts[1];
