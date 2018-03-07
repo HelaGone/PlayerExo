@@ -82,7 +82,7 @@ public class MediaNotificationManager {
                 .setLargeIcon(largeIcon)
                 .setContentIntent(pendingIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(android.R.drawable.stat_sys_headset)
+                .setSmallIcon(R.drawable.ic_music_note)
                 .addAction(icon, "pause", action)
                 .addAction(R.drawable.ic_stop_white, "stop", stopAction)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)

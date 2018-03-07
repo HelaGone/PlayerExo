@@ -338,9 +338,6 @@ public class RadioService extends Service implements
             wifiLock.acquire();
         }
 
-        DefaultAllocator allocator = new DefaultAllocator(true, BUFFER_SEGMENT_SIZE);
-        //DefaultLoadControl defaultLoadControl = new DefaultLoadControl(allocator, );
-
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, getClass().getSimpleName()), bandwidthMeter);
         DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
