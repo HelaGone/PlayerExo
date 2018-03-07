@@ -391,7 +391,6 @@ public class RadioService extends Service implements
     }
 
     public boolean isPlaying(){
-
         return this.status.equals(PlaybackStatus.PLAYING);
     }
 
