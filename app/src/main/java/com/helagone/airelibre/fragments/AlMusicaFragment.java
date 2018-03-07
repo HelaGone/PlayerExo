@@ -190,8 +190,7 @@ public class AlMusicaFragment extends Fragment {
         time_duration.setTypeface(custom_font);
         spacer_pipe.setTypeface(custom_font);
 
-        SharedPreferences sh_prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
-
+        //SharedPreferences sh_prefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         //handler.postDelayed(progressbar_update, 1000);
         //handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
 
@@ -250,10 +249,14 @@ public class AlMusicaFragment extends Fragment {
         connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
                 (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
-            Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
+            if(linkSpeed == -127){
+                Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
+            }
             connected = true;
         }else {
-            Toast.makeText(getActivity(), "No hay WiFi", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
             connected = false;
             trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
             trigger.setImageResource(R.drawable.ic_play_arrow_black);
@@ -275,7 +278,7 @@ public class AlMusicaFragment extends Fragment {
                     //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
                     shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                     //artistName.setText(shoutcasts.get(0).getName());
-                    streamURL = shoutcasts.get(3).getUrl();
+                    streamURL = shoutcasts.get(0).getUrl();
                     //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                     mListener.onFragmentInteraction(streamURL);
                 }else{
@@ -441,13 +444,8 @@ public class AlMusicaFragment extends Fragment {
                 Glide.with(getActivity()).load("http://lisa.mx/airelibre/al_imagenes/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
                 //DEV
                 //Glide.with(getActivity()).load("http://lisa.mx/airelibre/hk-images/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
-
-
-
-
             }
         }, 2000);
-
     }
 
 
@@ -578,13 +576,13 @@ public class AlMusicaFragment extends Fragment {
                     artist_name = "Aire Libre";
                     track_name = "Aire Libre";
                     album_name = "Aire Libre";
-                    duration = "300";
+                    duration = "1";
                     start_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                 }else{
                     //Sí tiene metadata. Ejecutar toda la operación
                     meta_parts = lametadata.split("_-_");
                     //Log.d("indices", String.valueOf( meta_parts.length ));
-                    if(meta_parts.length > 4){
+                    if(meta_parts.length == 5){
                         artist_name = meta_parts[0];
                         track_name = meta_parts[1];
                         album_name = meta_parts[2];
@@ -594,7 +592,7 @@ public class AlMusicaFragment extends Fragment {
                         artist_name = meta_parts[0];
                         track_name = meta_parts[1];
                         album_name = meta_parts[2];
-                        duration = "300";
+                        duration = "1";
                         start_time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
                     }
                 }
