@@ -1,16 +1,15 @@
 package com.helagone.airelibre.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.helagone.airelibre.R;
-
 public class TermsActivity extends Activity {
     private WebView mWebView;
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -40,6 +40,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.helagone.airelibre.R;
 import com.helagone.airelibre.activity.ScheduleActivity;
+import com.helagone.airelibre.connectivity.Connectivity;
 import com.helagone.airelibre.datafetch.CurrentMetadataFetcher;
 import com.helagone.airelibre.datamodel.TrackModel;
 import com.helagone.airelibre.service.RadioManager;
@@ -112,7 +113,6 @@ public class AlMusicaFragment extends Fragment {
 
     Boolean isready = false;
     Boolean addTo = false;
-    boolean connected = false;
 
     public ArrayList<TrackModel> oneTrackModels = new ArrayList<>();
 
@@ -135,8 +135,6 @@ public class AlMusicaFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    ConnectivityManager connectivityManager;
-    WifiManager wifiManager;
     int linkSpeed;
 
     public AlMusicaFragment() {
@@ -167,6 +165,8 @@ public class AlMusicaFragment extends Fragment {
 
         timer = new Timer();
         timer.schedule(new timerUpdTask(), 0, 1000);
+
+        checkConnectivity();
     }
 
     @Override
@@ -194,26 +194,6 @@ public class AlMusicaFragment extends Fragment {
         //handler.postDelayed(progressbar_update, 1000);
         //handler.postDelayed(runnable, sh_prefs.getInt("loquefalta", 2000));
 
-        //HANDLING TIME OF THE DAY
-        if (limit > 1800 || limit < 700) {
-            //Log.d("limit", String.valueOf(limit));
-            fragmentView.setBackground(getResources().getDrawable(R.color.dark));
-
-            gotoPlaylist.setTextColor(getResources().getColor(R.color.blanco));
-            artistName.setTextColor(getResources().getColor(R.color.cool_grey));
-            time_duration.setTextColor(getResources().getColor(R.color.cool_grey));
-            time_remain.setTextColor(getResources().getColor(R.color.cool_grey));
-            spacer_pipe.setTextColor(getResources().getColor(R.color.cool_grey));
-
-            menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
-
-            try {
-                ((AppCompatActivity) getActivity()).getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.dark));
-            } catch (NullPointerException nex) {
-                nex.printStackTrace();
-            }
-        }
-
         toolbar = getActivity().findViewById(R.id.toolbar);
         menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
 
@@ -225,51 +205,18 @@ public class AlMusicaFragment extends Fragment {
             }
         }
 
+        timeOfDay(fragmentView);
+
         SharedPreferences dw_sharedPrefs = getActivity().getPreferences(Context.MODE_PRIVATE);
         int sh_transcurrido = dw_sharedPrefs.getInt("transcurrido", 2000);
         int sh_duracion = dw_sharedPrefs.getInt("duracion", 2000);
         transc_to_cent = sh_transcurrido * 100 / sh_duracion;
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
-                //Metering Signal Strength over WIFI in RSSI min -127, max -30
-                try {
-                    wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-                    linkSpeed = wifiManager.getConnectionInfo().getRssi();
-                    Log.d("strength", String.valueOf(linkSpeed));
-                } catch (NullPointerException nulex) {
-                    nulex.printStackTrace();
-                }
-
-                /*
-                * Connectivity manager
-                * Getting connection type and connection state
-                * Sending Toast to user to let him know network quality and if he's connected to WiFi
-                */
-                connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-                if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
-                        (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
-                    if(linkSpeed == -127){
-                        Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
-                    }else{
-                        Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
-                    }
-                    connected = true;
-                }else {
-                    Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
-                    connected = false;
-                    trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
-                    trigger.setImageResource(R.drawable.ic_play_arrow_black);
-                }
-
-
-
-                if(radioManager != null && connected){
+                if(radioManager != null && Connectivity.isConnected(getActivity())){
                     if(radioManager.isPlaying()){
                         trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
                         trigger.setImageResource(R.drawable.ic_play_arrow_black);
@@ -280,14 +227,10 @@ public class AlMusicaFragment extends Fragment {
                     //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
                     shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                     //artistName.setText(shoutcasts.get(0).getName());
-                    streamURL = shoutcasts.get(2).getUrl();
+                    streamURL = shoutcasts.get(0).getUrl();
                     //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                     mListener.onFragmentInteraction(streamURL);
-                }else{
-                    Log.d("connectivity", "No hay conexión para nettops");
-                    Toast.makeText(getActivity(), "No hay conexión", Toast.LENGTH_SHORT).show();
                 }
-
                 //////////////////////////////////////////////////////////////////////////////////////////////////////////
             }
         });
@@ -429,7 +372,11 @@ public class AlMusicaFragment extends Fragment {
     }
 
     private void runMetadataFetcher(){
-        new MetadataFetcher().execute();
+        if(Connectivity.isConnected(getActivity()) && Connectivity.isConnectedFast(getActivity())){
+            new MetadataFetcher().execute();
+        }else{
+            Toast.makeText(getActivity(), "No tienes connexión", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -441,18 +388,101 @@ public class AlMusicaFragment extends Fragment {
                 //new CoverFetcher().FetchCover("http://lisa.mx/airelibre/al_imagenes/art-00.jpg");
                 RequestOptions options = new RequestOptions();
                 options.circleCrop();
-                //TODO: CHANGE URL TO PROD URL FOR IMAGE COVER
-                //PROD
-                Glide.with(getActivity()).load("http://lisa.mx/airelibre/al_imagenes/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
-                //DEV
-                //Glide.with(getActivity()).load("http://lisa.mx/airelibre/hk-images/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+                if(getActivity() != null){
+                    if(Connectivity.isConnected(getActivity())){
+                        //TODO: CHANGE URL TO PROD URL FOR IMAGE COVER
+                        //PROD
+                        Glide.with(getActivity()).load("http://lisa.mx/airelibre/al_imagenes/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+                        //DEV
+                        //Glide.with(getActivity()).load("http://lisa.mx/airelibre/hk-images/art-00.jpg?"+System.currentTimeMillis()).apply(options).into(coverart);
+                    }else{
+                        Glide.with(getActivity()).load(R.drawable.program_header_bg).apply(options).into(coverart);
+                    }
+                }
             }
         }, 2000);
     }
 
+    /*private int LinkSpeed(){
+        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        //Metering Link Speed over WIFI in RSSI min -127, max -30
+        try {
+            linkSpeed = wifiManager.getConnectionInfo().getRssi();
+            Log.d("strength", String.valueOf(linkSpeed));
+        } catch (NullPointerException nulex) {
+            nulex.printStackTrace();
+        }
+        return 0;
+    }*/
 
 
 
+    /*private  void connectionState(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
+                (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
+            connected = true;
+            if( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ){
+
+            }else if( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED && linkSpeed < -90){
+                Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
+            }
+        }else {
+            Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
+            connected = false;
+            trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+            trigger.setImageResource(R.drawable.ic_play_arrow_black);
+        }
+    }*/
+
+
+    private void checkConnectivity(){
+        Boolean connected = Connectivity.isConnected(getActivity());
+        Boolean wifiConn = Connectivity.isConnectedWifi(getActivity());
+        Boolean mobileConn = Connectivity.isConnectedMobile(getActivity());
+        Boolean fastConn = Connectivity.isConnectedFast(getActivity());
+
+        if(wifiConn && mobileConn && fastConn && connected){
+            Toast.makeText(getActivity(), "Tu conexión es buena", Toast.LENGTH_SHORT).show();
+        }else if(!wifiConn && mobileConn && fastConn && connected){
+            Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
+        }else if(wifiConn && ! mobileConn && fastConn && connected){
+            Toast.makeText(getActivity(), "Tu conexión WIFI es buena", Toast.LENGTH_SHORT).show();
+        }else if(wifiConn || mobileConn && fastConn && connected){
+            Toast.makeText(getActivity(), "Tu conexión es buena", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(getActivity(), "No tienes conexión", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void timeOfDay(View view){
+        //TODAY CALC
+        d_current_date = new Date();
+        _the_time = thedateFormat.format(d_current_date);
+        String twentyfour = _the_time.replace(":", "");
+        limit =  Integer.parseInt(twentyfour);
+
+        //HANDLING TIME OF THE DAY
+        if (limit > 1800 || limit < 700) {
+            //Log.d("limit", String.valueOf(limit));
+            view.setBackground(getResources().getDrawable(R.color.dark));
+
+            gotoPlaylist.setTextColor(getResources().getColor(R.color.blanco));
+            artistName.setTextColor(getResources().getColor(R.color.cool_grey));
+            time_duration.setTextColor(getResources().getColor(R.color.cool_grey));
+            time_remain.setTextColor(getResources().getColor(R.color.cool_grey));
+            spacer_pipe.setTextColor(getResources().getColor(R.color.cool_grey));
+
+            menu_night = getResources().getDrawable(R.drawable.ic_menu_night);
+
+            try {
+                ((AppCompatActivity) getActivity()).getSupportActionBar().setBackgroundDrawable(getResources().getDrawable(R.color.dark));
+            } catch (NullPointerException nex) {
+                nex.printStackTrace();
+            }
+        }
+
+    }
 
 
 
@@ -483,11 +513,7 @@ public class AlMusicaFragment extends Fragment {
             custom_font = Typeface.createFromAsset(getActivity().getAssets(),  "fonts/WorkSans-Regular.ttf");
             ws_semibold    = Typeface.createFromAsset(getActivity().getAssets(), "fonts/WorkSans-SemiBold.ttf");
 
-            //TODAY CALC
-            d_current_date = new Date();
-            _the_time = thedateFormat.format(d_current_date);
-            String twentyfour = _the_time.replace(":", "");
-            limit =  Integer.parseInt(twentyfour);
+
 
 
         } else {

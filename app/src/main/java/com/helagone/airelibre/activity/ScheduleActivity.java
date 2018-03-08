@@ -26,6 +26,7 @@ import android.widget.TextView;
 
 import com.helagone.airelibre.MainActivity;
 import com.helagone.airelibre.R;
+import com.helagone.airelibre.connectivity.Connectivity;
 import com.helagone.airelibre.datafetch.ProgramFetcher;
 import com.helagone.airelibre.datamodel.DataModel;
 import com.helagone.airelibre.interaction.RecyclerItemClickListener;
@@ -164,7 +165,9 @@ public class ScheduleActivity extends AppCompatActivity implements AppBarLayout.
 
 
 
-        new FetchMetadataTask().execute();
+        if(Connectivity.isConnected(this) && Connectivity.isConnectedFast(this)){
+            new FetchMetadataTask().execute();
+        }
     }
 
 
