@@ -224,10 +224,10 @@ public class AlMusicaFragment extends Fragment {
                         trigger.setBackground(getResources().getDrawable(R.color.transparente));
                         trigger.setImageResource(R.color.transparente);
                     }
-                    //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
+                    //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo), 4 -> dev4 (streamguys demo)
                     shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                     //artistName.setText(shoutcasts.get(0).getName());
-                    streamURL = shoutcasts.get(0).getUrl();
+                    streamURL = shoutcasts.get(4).getUrl();
                     //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                     mListener.onFragmentInteraction(streamURL);
                 }
@@ -242,13 +242,14 @@ public class AlMusicaFragment extends Fragment {
             }
         });
 
-        if(getActivity() != null){
+
+        /*if(getActivity() != null){
             if(getActivity() != null){
                 RequestOptions options = new RequestOptions();
                 options.circleCrop();
                 Glide.with(getActivity()).load(coverUrl).apply(options).into(coverart);
             }
-        }
+        }*/
 
 
         /*

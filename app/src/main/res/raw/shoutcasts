@@ -14,5 +14,9 @@
   {
     "name": "Mediastream",
     "stream": "http://radio1.us.mediastre.am/radiodemo1.aac"
+  },
+  {
+    "name": "Streamguys",
+    "stream": "http://tektite.streamguys1.com:5350/live"
   }
 ]
