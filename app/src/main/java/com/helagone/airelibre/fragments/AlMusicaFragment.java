@@ -232,41 +232,43 @@ public class AlMusicaFragment extends Fragment {
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-        //Metering Signal Strength over WIFI in RSSI min -127, max -30
-        try {
-            wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            linkSpeed = wifiManager.getConnectionInfo().getRssi();
-            Log.d("strength", String.valueOf(linkSpeed));
-        } catch (NullPointerException nulex) {
-            nulex.printStackTrace();
-        }
-
-        /*
-         * Connectivity manager
-         * Getting connection type and connection state
-         * Sending Toast to user to let him know network quality and if he's connected to WiFi
-         */
-        connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
-                (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
-            if(linkSpeed == -127){
-                Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
-            }else{
-                Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
-            }
-            connected = true;
-        }else {
-            Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
-            connected = false;
-            trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
-            trigger.setImageResource(R.drawable.ic_play_arrow_black);
-        }
-
-
-
         trigger.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
+                //Metering Signal Strength over WIFI in RSSI min -127, max -30
+                try {
+                    wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    linkSpeed = wifiManager.getConnectionInfo().getRssi();
+                    Log.d("strength", String.valueOf(linkSpeed));
+                } catch (NullPointerException nulex) {
+                    nulex.printStackTrace();
+                }
+
+                /*
+                * Connectivity manager
+                * Getting connection type and connection state
+                * Sending Toast to user to let him know network quality and if he's connected to WiFi
+                */
+                connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                if ( ( connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED && linkSpeed > -65 ) ||
+                        (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED) ) {
+                    if(linkSpeed == -127){
+                        Toast.makeText(getActivity(), "Tu conexión GSM es buena", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getActivity(), "Tu conexión WiFi es buena: " + String.valueOf(linkSpeed) + "dBm", Toast.LENGTH_SHORT).show();
+                    }
+                    connected = true;
+                }else {
+                    Toast.makeText(getActivity(), "No hay conexión a internet", Toast.LENGTH_SHORT).show();
+                    connected = false;
+                    trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
+                    trigger.setImageResource(R.drawable.ic_play_arrow_black);
+                }
+
+
+
                 if(radioManager != null && connected){
                     if(radioManager.isPlaying()){
                         trigger.setBackground(getResources().getDrawable(R.drawable.ic_album_inside_circle));
@@ -278,7 +280,7 @@ public class AlMusicaFragment extends Fragment {
                     //TODO: SET STREAM TO PROD. 0 -> prod, 1 -> dev1, 2 -> dev2 (myradiostream), 3 -> dev3 (mediastream demo)
                     shoutcasts = ShoutcastHelper.retrieveShoutcasts(getActivity());
                     //artistName.setText(shoutcasts.get(0).getName());
-                    streamURL = shoutcasts.get(0).getUrl();
+                    streamURL = shoutcasts.get(2).getUrl();
                     //SENDING STRING URL TO ACTIVITY @ radioManager -> playOrPause
                     mListener.onFragmentInteraction(streamURL);
                 }else{
