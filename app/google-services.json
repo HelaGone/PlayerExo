@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "678105965086",
+    "firebase_url": "https://airelibre-f0153.firebaseio.com",
+    "project_id": "airelibre-f0153",
+    "storage_bucket": "airelibre-f0153.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:678105965086:android:533eb9186c13a52b",
+        "android_client_info": {
+          "package_name": "com.helagone.airelibre"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "678105965086-o1a2vr28td98aqiuifrl1guvslroovtc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaPCArmRbz8yD9Np7UhhCCK86U70FxJgs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

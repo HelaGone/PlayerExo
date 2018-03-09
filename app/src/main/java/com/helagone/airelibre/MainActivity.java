@@ -29,6 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.helagone.airelibre.activity.ScheduleActivity;
 import com.helagone.airelibre.activity.TermsActivity;
 import com.helagone.airelibre.fragments.AlMusicaFragment;
@@ -105,10 +106,17 @@ public class MainActivity extends AppCompatActivity
     Typeface custom_font;
     Typeface ws_semibold;
 
+    //FIREBASE
+    private FirebaseAnalytics mFirebaseAnalytics;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //FIREBASE ANALYTICS
+        // Obtain the FirebaseAnalytics instance
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         custom_font = Typeface.createFromAsset(getAssets(),  "fonts/WorkSans-Regular.ttf");
         ws_semibold = Typeface.createFromAsset(getAssets(), "fonts/WorkSans-SemiBold.ttf");

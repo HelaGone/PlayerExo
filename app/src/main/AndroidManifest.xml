@@ -18,36 +18,25 @@
         android:roundIcon="@mipmap/logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <service android:name=".service.RadioService" />
 
         <activity
             android:name=".splash.SplashActivity"
-            android:label="@string/title_activity_splash"
-            android:theme="@style/AppTheme">
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
 
             <intent-filter>
-
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-
             </intent-filter>
 
         </activity>
 
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!--
-            A receiver that will receive media buttons and send as
-            intents to your MediaBrowserServiceCompat implementation.
-            Required on pre-Lollipop. More information at
-            http://developer.android.com/reference/android/support/v4/media/session/MediaButtonReceiver.html
-        -->
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait" />
 
         <receiver android:name="android.support.v4.media.session.MediaButtonReceiver">
             <intent-filter>
@@ -55,10 +44,14 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".activity.TermsActivity" />
+        <activity
+            android:name=".activity.TermsActivity"
+            android:screenOrientation="portrait"/>
+
         <activity
             android:name=".activity.ScheduleActivity"
-            android:theme="@style/AppTheme.NoActionBar.noPrimaryColor" />
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar.noPrimaryColor"/>
 
     </application>
 
